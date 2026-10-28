@@ -210,12 +210,12 @@ export function ApplyPage() {
       // 2. Immediately save application record in Supabase (even before payment!)
       const created = await createApplication({
         data: {
-          supermarket: market,
-          positionId: selectedPosition.id,
-          preferredBranch,
-          orientationBranch,
-          orientationDate,
-          availability,
+          supermarket: market || "carrefour",
+          positionId: selectedPosition?.id || "drivers",
+          preferredBranch: preferredBranch || marketDetails?.branches?.[0] || "Main Branch",
+          orientationBranch: orientationBranch || marketDetails?.branches?.[0] || "Main Branch",
+          orientationDate: orientationDate || "2026-10-19",
+          availability: availability || "Full Day Orientation",
           fullName: fullName.trim(),
           idNumber: idNumber.trim(),
           email: email.trim(),
@@ -300,36 +300,38 @@ export function ApplyPage() {
                     key={id}
                     type="button"
                     onClick={() => pickMarket(id)}
-                    className={`relative flex flex-col justify-between rounded-3xl border-2 p-5 text-left transition-all ${
+                    className={`group relative flex flex-col overflow-hidden rounded-3xl border-2 text-left transition-all ${
                       active
                         ? "border-emerald-600 bg-emerald-500/5 shadow-lg shadow-emerald-600/10 ring-2 ring-emerald-600/20"
-                        : "border-border bg-card hover:border-border/80 hover:bg-secondary/30"
+                        : "border-border bg-card hover:border-emerald-500/40 hover:bg-secondary/20"
                     }`}
                   >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="size-14 overflow-hidden rounded-2xl border border-border/80 bg-white p-1 shadow-sm flex items-center justify-center">
-                          <img
-                            src={m.logoUrl}
-                            alt={m.name}
-                            className="size-full object-contain"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = "none";
-                            }}
-                          />
-                        </div>
-                        {active && (
-                          <span className="grid size-6 place-items-center rounded-full bg-emerald-600 text-white">
-                            <Check className="size-4" />
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="mt-4 font-display text-xl font-bold">{m.brandName}</h3>
-                      <p className="mt-1 text-xs text-muted-foreground">{m.tagline}</p>
+                    {/* Top icon header filling top part of card */}
+                    <div className="relative h-24 w-full border-b border-border/60 bg-white flex items-center justify-center p-3">
+                      <img
+                        src={m.logoUrl}
+                        alt={m.name}
+                        className="max-h-full max-w-[140px] object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
+                      {active && (
+                        <span className="absolute top-2 right-2 grid size-6 place-items-center rounded-full bg-emerald-600 text-white shadow-sm">
+                          <Check className="size-3.5" />
+                        </span>
+                      )}
                     </div>
 
-                    <div className="mt-4 border-t border-border/60 pt-3 text-[11px] text-muted-foreground">
-                      <span>{m.branches.length} Branches · HR: {m.hrName}</span>
+                    <div className="flex flex-1 flex-col justify-between p-5">
+                      <div>
+                        <h3 className="font-display text-lg font-bold">{m.brandName}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground">{m.tagline}</p>
+                      </div>
+
+                      <div className="mt-4 border-t border-border/60 pt-2 text-[11px] text-muted-foreground">
+                        <span>{m.branches.length} Branches · HR: {m.hrName}</span>
+                      </div>
                     </div>
                   </button>
                 );
@@ -340,13 +342,13 @@ export function ApplyPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-display text-xl font-bold">Select Position</h2>
+                  <h2 className="font-display text-xl font-bold">Select Position You Applied For</h2>
                   <p className="text-xs text-muted-foreground">
-                    What role are you looking for at <strong>{marketDetails.name}</strong>?
+                    What role did you apply and qualify for at <strong>{marketDetails.name}</strong>?
                   </p>
                 </div>
                 <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
-                  {POSITIONS.length} Available Roles
+                  {POSITIONS.length} Approved Roles
                 </Badge>
               </div>
 
@@ -392,7 +394,7 @@ export function ApplyPage() {
                           variant={active ? "default" : "outline"}
                           className={active ? "bg-emerald-600 text-white hover:bg-emerald-500" : ""}
                         >
-                          {active ? "Selected" : "Apply Now"}
+                          {active ? "Selected ✓" : "Select Position"}
                         </Button>
                       </div>
                     </div>
@@ -686,11 +688,11 @@ export function ApplyPage() {
               >
                 {busy ? (
                   <>
-                    <Loader2 className="mr-2 size-4 animate-spin" /> Saving Application to Supabase…
+                    <Loader2 className="mr-2 size-4 animate-spin" /> Saving Documents & Creating Profile…
                   </>
                 ) : (
                   <>
-                    Save Application & Proceed to Letter Fee <ArrowRight className="ml-2 size-4" />
+                    Save Documents & Proceed to Letter Fee <ArrowRight className="ml-2 size-4" />
                   </>
                 )}
               </Button>

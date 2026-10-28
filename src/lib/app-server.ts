@@ -290,10 +290,19 @@ export interface CreateAppInput {
 }
 
 export const createApplication = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => d as { data: CreateAppInput })
-  .handler(async ({ data: { data } }) => {
+  .validator((d: unknown) => d as CreateAppInput | { data: CreateAppInput })
+  .handler(async ({ data: rawData }) => {
+    const data: CreateAppInput =
+      rawData && typeof rawData === "object" && "data" in rawData && (rawData as any).data
+        ? ((rawData as any).data as CreateAppInput)
+        : (rawData as CreateAppInput);
+
+    if (!data) {
+      throw new Error("Application data is missing");
+    }
+
     const marketId: MarketId = isMarketId(data.supermarket) ? data.supermarket : "quickmart";
-    const market = MARKETS[marketId];
+    const market = MARKETS[marketId] ?? MARKETS.quickmart;
     const pos = POSITIONS.find((p) => p.id === data.positionId) || POSITIONS[0];
 
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -381,27 +390,31 @@ export const createApplication = createServerFn({ method: "POST" })
   });
 
 export const confirmMpesaPayment = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => d as { applicationId: string; phone: string })
-  .handler(async ({ data }) => {
+  .validator((d: unknown) => d as { applicationId: string; phone: string } | { data: { applicationId: string; phone: string } })
+  .handler(async ({ data: rawData }) => {
+    const payload = (rawData && typeof rawData === "object" && "data" in rawData && (rawData as any).data) ? (rawData as any).data : rawData;
+    const applicationId = payload?.applicationId || (rawData as any)?.applicationId;
+    const phone = payload?.phone || (rawData as any)?.phone || "";
+
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     const receipt = "Q" + Array.from({ length: 9 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
     const paidAt = new Date().toISOString();
 
     // Update in memoryStore
-    const memIndex = memoryStore.findIndex((r) => r.id === data.applicationId);
+    const memIndex = memoryStore.findIndex((r) => r.id === applicationId);
     if (memIndex >= 0) {
       memoryStore[memIndex].payment_status = "paid";
-      memoryStore[memIndex].payment_phone = data.phone;
+      memoryStore[memIndex].payment_phone = phone;
       memoryStore[memIndex].mpesa_receipt = receipt;
       memoryStore[memIndex].paid_at = paidAt;
       await updateStoredApplications(memoryStore[memIndex]);
     } else {
       // Try finding in storage
       const stored = await getStoredApplications();
-      const stIndex = stored.findIndex((r) => r.id === data.applicationId);
+      const stIndex = stored.findIndex((r) => r.id === applicationId);
       if (stIndex >= 0) {
         stored[stIndex].payment_status = "paid";
-        stored[stIndex].payment_phone = data.phone;
+        stored[stIndex].payment_phone = phone;
         stored[stIndex].mpesa_receipt = receipt;
         stored[stIndex].paid_at = paidAt;
         await updateStoredApplications(stored[stIndex]);
@@ -410,7 +423,7 @@ export const confirmMpesaPayment = createServerFn({ method: "POST" })
 
     // Try updating Supabase table
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/applications?id=eq.${data.applicationId}`, {
+      await fetch(`${SUPABASE_URL}/rest/v1/applications?id=eq.${applicationId}`, {
         method: "PATCH",
         headers: {
           apikey: SERVICE_KEY,
@@ -419,7 +432,7 @@ export const confirmMpesaPayment = createServerFn({ method: "POST" })
         },
         body: JSON.stringify({
           payment_status: "paid",
-          payment_phone: data.phone,
+          payment_phone: phone,
           mpesa_receipt: receipt,
         }),
       });
@@ -506,9 +519,10 @@ export const getAdminApplications = createServerFn({ method: "GET" })
   });
 
 export const getLetterByRef = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => (d as { ref: string }).ref)
+  .validator((d: unknown) => (typeof d === "string" ? d : (d as any)?.ref || (d as any)?.data?.ref || ""))
   .handler(async ({ data: ref }) => {
-    const cleanRef = ref.trim().toUpperCase();
+    const rawRef = typeof ref === "string" ? ref : (ref as any)?.ref || (ref as any)?.data?.ref || "";
+    const cleanRef = String(rawRef).trim().toUpperCase();
 
     // Check memory store
     const mem = memoryStore.find((r) => r.reference_number.toUpperCase() === cleanRef);

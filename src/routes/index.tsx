@@ -92,9 +92,7 @@ function Landing() {
             Congratulations! Your supermarket employment is <span className="text-emerald-600 dark:text-emerald-400">approved.</span>
           </h1>
           <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-            You successfully qualified for positions at <strong className="text-foreground">Carrefour</strong>,{" "}
-            <strong className="text-foreground">Quickmart</strong>, or{" "}
-            <strong className="text-foreground">Naivas</strong>. Log in, select the supermarket and role you applied for, review your salary structure, upload your ID and CV for verification, and download your official <strong className="text-foreground">Employment Acceptance & Orientation Letter</strong>.
+            You have qualified for your applied role and position. Select the supermarket and position you applied for, review your approved salary structure and allowances, upload your ID and CV for verification, and download your official <strong className="text-foreground">Employment Acceptance & Orientation Letter</strong>.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Button size="lg" asChild className="bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500">
@@ -162,39 +160,43 @@ function Landing() {
               <button
                 key={id}
                 onClick={() => setMarket(id)}
-                className={`group rounded-3xl border-2 bg-card p-6 text-left transition-all hover:-translate-y-1 hover:shadow-xl ${
-                  active ? "border-emerald-600 shadow-lg shadow-emerald-600/10 ring-2 ring-emerald-600/20" : "border-border"
+                className={`group relative flex flex-col overflow-hidden rounded-3xl border-2 bg-card text-left transition-all hover:-translate-y-1 hover:shadow-xl ${
+                  active ? "border-emerald-600 shadow-lg shadow-emerald-600/10 ring-2 ring-emerald-600/20" : "border-border hover:border-emerald-500/40"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="size-16 overflow-hidden rounded-2xl border border-border/80 bg-white p-1 shadow-sm flex items-center justify-center">
-                    <img
-                      src={m.logoUrl}
-                      alt={m.name}
-                      className="size-full object-contain"
-                      onError={(e) => {
-                        // fallback to styled initials if image blocked
-                        (e.target as HTMLElement).style.display = "none";
-                      }}
-                    />
-                  </div>
+                {/* Top icon header: fills top part of card */}
+                <div className="relative h-28 w-full border-b border-border/60 bg-white flex items-center justify-center p-4">
+                  <img
+                    src={m.logoUrl}
+                    alt={m.name}
+                    className="max-h-full max-w-[150px] object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
                   {active && (
-                    <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-sm flex items-center gap-1">
+                    <span className="absolute top-3 right-3 rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm flex items-center gap-1">
                       <Check className="size-3" /> Selected
                     </span>
                   )}
                 </div>
-                <h3 className="mt-4 font-display text-2xl font-bold">{m.brandName}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{m.tagline}</p>
-                <div className="mt-4 space-y-1 border-t border-border/50 pt-3 text-xs text-muted-foreground">
-                  <p><strong>HR Representative:</strong> {m.hrName}</p>
-                  <p><strong>Official Phone:</strong> {m.hrPhone}</p>
-                  <p><strong>Official Email:</strong> {m.hrEmail}</p>
+
+                {/* Text Content below image */}
+                <div className="flex flex-1 flex-col justify-between p-6">
+                  <div>
+                    <h3 className="font-display text-2xl font-bold">{m.brandName}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{m.tagline}</p>
+                  </div>
+                  <div className="mt-4 space-y-1 border-t border-border/50 pt-3 text-xs text-muted-foreground">
+                    <p><strong>HR Representative:</strong> {m.hrName}</p>
+                    <p><strong>Official Phone:</strong> {m.hrPhone}</p>
+                    <p><strong>Official Email:</strong> {m.hrEmail}</p>
+                  </div>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    {active ? "View Qualified Roles" : "Select This Supermarket"}{" "}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  </span>
                 </div>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                  {active ? "View Remuneration & Letters" : "Select This Supermarket"}{" "}
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </span>
               </button>
             );
           })}
@@ -210,10 +212,10 @@ function Landing() {
                 Approved Positions & Remuneration
               </span>
               <h2 className="mt-1 font-display text-3xl font-extrabold tracking-tight">
-                What role are you looking for at {MARKETS[market].name}?
+                What role did you apply and qualify for at {MARKETS[market].name}?
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                All qualified positions include published gross monthly salary, allowances, and orientation venue details.
+                Select the position you applied for to review your approved salary, allowances, and schedule orientation.
               </p>
             </div>
             <Tabs value={market} onValueChange={(v) => setMarket(v as MarketId)}>
@@ -260,7 +262,7 @@ function Landing() {
 
                     <Button asChild size="sm" className="mt-4 w-full bg-emerald-600 font-bold text-white hover:bg-emerald-500">
                       <Link to="/apply" search={{ market, role: p.id }}>
-                        Download Acceptance Letter <ArrowRight className="ml-1 size-3.5" />
+                        Select Qualified Position <ArrowRight className="ml-1 size-3.5" />
                       </Link>
                     </Button>
                   </div>
