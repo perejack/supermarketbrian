@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getLetterByRef, type ApplicationRow } from "@/lib/app-server";
-import { MARKETS, POSITIONS, formatKsh, ORIENTATION_TIME, type MarketId, isMarketId } from "@/lib/jobs";
+import { MARKETS, formatKsh, ORIENTATION_TIME, type MarketId, isMarketId } from "@/lib/jobs";
 import { downloadLetterPdf, printOrSavePdf } from "@/lib/letter-generator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -141,48 +141,8 @@ function LetterPage() {
         // ignore
       }
 
-      // 3. Fallback: Parse reference prefix (CRF = Carrefour, QRT = Quickmart, NVS = Naivas)
-      const prefix = ref!.split("-")[0]?.toUpperCase();
-      let detectedMarket: MarketId = "carrefour";
-      if (prefix === "QRT") detectedMarket = "quickmart";
-      else if (prefix === "NVS") detectedMarket = "naivas";
-
-      const m = MARKETS[detectedMarket];
-      const defaultPos = POSITIONS[3]; // Drivers
-
-      const fallbackRecord: ApplicationRow = {
-        id: `recovered-${Date.now()}`,
-        user_id: null,
-        reference_number: ref!,
-        supermarket: detectedMarket,
-        supermarket_name: m.brandName,
-        position: defaultPos.title,
-        position_category: defaultPos.category,
-        monthly_salary: defaultPos.baseSalary,
-        allowance_label: defaultPos.allowanceLabel,
-        allowance_amount: defaultPos.allowanceValue,
-        full_name: "Candidate (Qualified)",
-        email: "candidate@supermarketjobs.ke",
-        phone: "0712 000 000",
-        id_number: "Approved",
-        preferred_branch: m.branches[0],
-        orientation_branch: m.branches[0],
-        orientation_date: "2026-10-19",
-        availability: "Full Day Orientation",
-        id_front_path: null,
-        id_back_path: null,
-        cv_path: null,
-        id_front_url: null,
-        id_back_url: null,
-        cv_url: null,
-        payment_status: "paid",
-        payment_phone: "0712 000 000",
-        mpesa_receipt: "Q" + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        paid_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      };
-
-      setLetter(fallbackRecord);
+      // Reference not found anywhere — show "Letter Not Found" screen
+      setLetter(null);
     }
 
     fetchFromSupabase().finally(() => setLoading(false));
@@ -292,22 +252,26 @@ function LetterPage() {
             </Badge>
           )}
 
-          <Button
-            size="sm"
-            onClick={() => downloadLetterPdf(letter)}
-            className="gap-2 bg-emerald-600 font-bold text-white shadow-md hover:bg-emerald-500"
-          >
-            <Download className="size-4" /> Download Letter (PDF)
-          </Button>
+          {isPaid && (
+            <>
+              <Button
+                size="sm"
+                onClick={() => downloadLetterPdf(letter)}
+                className="gap-2 bg-emerald-600 font-bold text-white shadow-md hover:bg-emerald-500"
+              >
+                <Download className="size-4" /> Download Letter (PDF)
+              </Button>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => printOrSavePdf(letter)}
-            className="gap-2 border-zinc-300 dark:border-zinc-700 font-semibold"
-          >
-            <Printer className="size-4" /> Print / Save PDF
-          </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => printOrSavePdf(letter)}
+                className="gap-2 border-zinc-300 dark:border-zinc-700 font-semibold"
+              >
+                <Printer className="size-4" /> Print / Save PDF
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
