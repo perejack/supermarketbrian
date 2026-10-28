@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { BadgeCheck, Clock3, FilePlus2, FileText, Loader2, Wallet } from "lucide-react";
+import { BadgeCheck, Clock3, FilePlus2, FileText, Loader2, Wallet, Download, Printer } from "lucide-react";
 import { getMyApplications, type ApplicationRow } from "@/lib/app-server";
 import { MARKETS, formatKsh, type MarketId } from "@/lib/jobs";
+import { downloadLetterHtml, printOrSavePdf } from "@/lib/letter-generator";
 import { PaymentPanel } from "@/components/PaymentPanel";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -98,11 +99,22 @@ function DashboardPage() {
                   </p>
                 </div>
                 {paid ? (
-                  <Button asChild className="font-semibold">
-                    <Link to="/letter" search={{ ref: app.reference_number }}>
-                      <FileText className="size-4" /> Acceptance letter
-                    </Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      className="gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-500 text-white"
+                      onClick={() => downloadLetterHtml(app)}
+                    >
+                      <Download className="size-4" /> Download Letter
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      title="Print or Save PDF"
+                      onClick={() => printOrSavePdf(app)}
+                    >
+                      <Printer className="size-4" />
+                    </Button>
+                  </div>
                 ) : (
                   <Button variant="outline" className="border-mpesa/60 font-semibold text-mpesa hover:bg-mpesa/10" onClick={() => setPaying(app)}>
                     <Wallet className="size-4" /> Complete payment

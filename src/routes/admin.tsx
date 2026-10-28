@@ -33,6 +33,7 @@ import {
   type ApplicationRow,
 } from "@/lib/app-server";
 import { MARKETS, formatKsh, APPLICATION_FEE, type MarketId, isMarketId } from "@/lib/jobs";
+import { downloadLetterHtml, printOrSavePdf } from "@/lib/letter-generator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -477,16 +478,15 @@ function AdminPage() {
                         </Button>
                       )}
 
-                      {/* View Acceptance Letter */}
+                      {/* Download Acceptance Letter */}
                       <Button
                         size="sm"
-                        asChild
-                        className="gap-1 bg-zinc-800 text-xs font-semibold text-white hover:bg-zinc-700"
+                        onClick={() => downloadLetterHtml(app)}
+                        className="gap-1 bg-emerald-700 text-xs font-semibold text-white hover:bg-emerald-600"
+                        title="Download official acceptance letter"
                       >
-                        <Link to="/letter" search={{ ref: app.reference_number }} target="_blank">
-                          <ExternalLink className="size-3" />
-                          Letter
-                        </Link>
+                        <Download className="size-3" />
+                        Download Letter
                       </Button>
 
                       {/* Status Toggle Button */}

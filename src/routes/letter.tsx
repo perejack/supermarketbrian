@@ -21,6 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getLetterByRef, type ApplicationRow } from "@/lib/app-server";
 import { MARKETS, POSITIONS, formatKsh, ORIENTATION_TIME, type MarketId, isMarketId } from "@/lib/jobs";
+import { downloadLetterHtml, printOrSavePdf } from "@/lib/letter-generator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -41,17 +42,7 @@ export const Route = createFileRoute("/letter")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: async ({ search }) => {
-    const ref = typeof search.ref === "string" ? search.ref.trim() : "";
-    if (!ref) return null;
-    try {
-      const res = await getLetterByRef({ data: { ref } });
-      return res;
-    } catch (e) {
-      console.warn("Letter loader server lookup error, fallback active:", e);
-      return null;
-    }
-  },
+  loader: () => null,
   component: LetterPage,
 });
 
@@ -303,19 +294,19 @@ function LetterPage() {
 
           <Button
             size="sm"
-            onClick={() => window.print()}
+            onClick={() => downloadLetterHtml(letter)}
             className="gap-2 bg-emerald-600 font-bold text-white shadow-md hover:bg-emerald-500"
           >
-            <Download className="size-4" /> Download Letter (PDF)
+            <Download className="size-4" /> Download Letter
           </Button>
 
           <Button
             size="sm"
             variant="outline"
-            onClick={handleDownloadHtml}
+            onClick={() => printOrSavePdf(letter)}
             className="gap-2 border-zinc-300 dark:border-zinc-700 font-semibold"
           >
-            <FileText className="size-4" /> Save HTML Copy
+            <Printer className="size-4" /> Print / Save PDF
           </Button>
         </div>
       </div>

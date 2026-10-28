@@ -21,7 +21,9 @@ import {
   Sparkles,
   ExternalLink,
   Printer,
+  Download,
 } from "lucide-react";
+import { downloadLetterHtml, printOrSavePdf, formatLongDate } from "@/lib/letter-generator";
 import { supabase } from "@/integrations/supabase/client";
 import { createApplication, type ApplicationRow } from "@/lib/app-server";
 import {
@@ -779,21 +781,17 @@ export function ApplyPage() {
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <Button
                   size="lg"
-                  asChild
+                  onClick={() => downloadLetterHtml(application)}
                   className="bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500"
                 >
-                  <Link to="/letter" search={{ ref: application.reference_number }}>
-                    <Eye className="mr-2 size-4" /> View Full Acceptance Letter
-                  </Link>
+                  <Download className="mr-2 size-5" /> Download Acceptance Letter
                 </Button>
 
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => {
-                    navigate({ to: "/letter", search: { ref: application.reference_number } });
-                  }}
-                  className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300"
+                  onClick={() => printOrSavePdf(application)}
+                  className="border-emerald-600/40 font-semibold text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300"
                 >
                   <Printer className="mr-2 size-4" /> Print / Save PDF
                 </Button>
@@ -804,39 +802,237 @@ export function ApplyPage() {
               </div>
             </div>
 
-            {/* Letter Preview Snapshot */}
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-md sm:p-8">
-              <div className="flex items-center justify-between border-b border-border pb-4">
-                <div>
-                  <h3 className="font-display text-lg font-bold">Orientation Summary</h3>
-                  <p className="text-xs text-muted-foreground">Official Letter Reference: {application.reference_number}</p>
-                </div>
-                <Badge className="bg-emerald-600 text-white">Payment Confirmed: {paidReceipt}</Badge>
-              </div>
+            {/* Complete Official Acceptance Letter Rendered Right Here */}
+            <article className="relative overflow-hidden rounded-3xl border border-zinc-300 bg-white p-6 text-zinc-900 shadow-xl dark:border-zinc-800 dark:bg-white dark:text-zinc-900 sm:p-12">
+              <div
+                className="absolute left-0 top-0 h-3 w-full"
+                style={{ backgroundColor: marketDetails.primaryColor }}
+              />
 
-              <div className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-                <div>
-                  <span className="text-xs text-muted-foreground">Position:</span>
-                  <p className="font-bold text-foreground">{application.position}</p>
+              {/* Letterhead */}
+              <header className="flex flex-col justify-between gap-6 border-b-2 border-zinc-800 pb-6 sm:flex-row sm:items-start">
+                <div className="flex items-start gap-4">
+                  <div className="size-16 shrink-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-1 shadow-sm flex items-center justify-center">
+                    <img
+                      src={marketDetails.logoUrl}
+                      alt={marketDetails.name}
+                      className="size-full object-contain"
+                    />
+                  </div>
+                  <div>
+                    <h1
+                      className="font-display text-2xl font-black tracking-tight sm:text-3xl"
+                      style={{ color: marketDetails.primaryColor }}
+                    >
+                      {marketDetails.brandName.toUpperCase()}
+                    </h1>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                      Human Resources & Recruitment Directorate
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Head Office: Nairobi, Kenya · Official Career Onboarding Portal
+                    </p>
+                  </div>
                 </div>
+
+                <div className="flex flex-col items-start rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-xs sm:items-end">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Official Reference</span>
+                  <span className="font-mono text-base font-extrabold text-zinc-900">{application.reference_number}</span>
+                  <span className="mt-1 text-zinc-500">Date Issued: {new Date().toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })}</span>
+                  <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 font-mono text-[11px] font-bold text-emerald-700">
+                    <CheckCircle2 className="size-3" />
+                    STATUS: VERIFIED & PAID ({paidReceipt})
+                  </div>
+                </div>
+              </header>
+
+              {/* Letter Body */}
+              <div className="mt-8 space-y-6 text-sm leading-relaxed text-zinc-800">
+                <div className="rounded-xl bg-zinc-100 p-4 border-l-4" style={{ borderColor: marketDetails.primaryColor }}>
+                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">SUBJECT</p>
+                  <h2 className="mt-1 font-display text-lg font-black tracking-tight text-zinc-950 sm:text-xl">
+                    RE: INTERVIEW SUCCESSFUL – INVITATION FOR ORIENTATION
+                  </h2>
+                </div>
+
                 <div>
-                  <span className="text-xs text-muted-foreground">Monthly Salary:</span>
-                  <p className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatKsh(application.monthly_salary)} + {application.allowance_label} ({application.allowance_amount})
+                  <p className="font-semibold text-zinc-950">Dear {application.full_name},</p>
+                  <p className="mt-3">
+                    Congratulations! We are pleased to inform you that you have successfully passed the interview and document
+                    verification stage for the position of <strong>{application.position}</strong> at{" "}
+                    <strong>{marketDetails.brandName}</strong>.
+                  </p>
+                  <p className="mt-2">
+                    Based on your qualified profile, you have been shortlisted and scheduled to join our retail operational team.
+                    You are cordially invited to attend an official orientation session as follows:
                   </p>
                 </div>
-                <div>
-                  <span className="text-xs text-muted-foreground">Orientation Venue:</span>
-                  <p className="font-bold text-foreground">
-                    {marketDetails.name}, {application.orientation_branch} Branch
-                  </p>
+
+                {/* Session Details Box */}
+                <div className="rounded-2xl border-2 border-zinc-200 bg-zinc-50/80 p-5 shadow-sm">
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-600">
+                    Orientation & Remuneration Details
+                  </h3>
+                  <ul className="grid gap-3 text-sm sm:grid-cols-2">
+                    <li className="flex items-center gap-2.5">
+                      <Calendar className="size-4 text-zinc-600" />
+                      <span>
+                        <strong>Date:</strong> {formatLongDate(application.orientation_date)}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <Clock className="size-4 text-zinc-600" />
+                      <span>
+                        <strong>Time:</strong> 9:00 AM Prompt
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2.5 sm:col-span-2">
+                      <MapPin className="size-4 text-zinc-600" />
+                      <span>
+                        <strong>Venue:</strong> {marketDetails.brandName}, {application.orientation_branch} Branch
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2.5 sm:col-span-2">
+                      <Building2 className="size-4 text-zinc-600" />
+                      <span>
+                        <strong>Assigned Work Location:</strong> {application.preferred_branch} Branch
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2.5 sm:col-span-2">
+                      <ShieldCheck className="size-4 text-zinc-600" />
+                      <span>
+                        <strong>Monthly Salary:</strong> {formatKsh(application.monthly_salary)} (gross)
+                        {application.allowance_amount ? ` + ${application.allowance_label}: ${application.allowance_amount}` : ""}
+                      </span>
+                    </li>
+                  </ul>
                 </div>
-                <div>
-                  <span className="text-xs text-muted-foreground">Orientation Date & Time:</span>
-                  <p className="font-bold text-foreground">{application.orientation_date} at 9:00 AM</p>
+
+                {/* Important Requirements */}
+                <div className="space-y-2">
+                  <h3 className="font-display text-base font-bold text-zinc-950">Important Requirements</h3>
+                  <ol className="list-decimal space-y-2 pl-5 text-zinc-700">
+                    <li>
+                      <strong>Download this letter and bring a printed hard copy</strong> on the day of orientation.
+                    </li>
+                    <li>
+                      <strong>Share a soft copy of this letter</strong> through the same communication channel through which you
+                      received it.
+                    </li>
+                    <li>
+                      <strong>Bring any additional documents required.</strong> The list will be communicated in due course
+                      (including your original National ID card, academic certificates, and KRA PIN).
+                    </li>
+                  </ol>
+                </div>
+
+                {/* Verification and Contact Information */}
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
+                  <h3 className="font-display text-base font-bold text-zinc-950">Verification and Contact Information</h3>
+                  <p className="mt-1 text-xs text-zinc-600">
+                    For clarification or verification of this invitation, please contact our Human Resources team:
+                  </p>
+                  <div className="mt-3 grid gap-2.5 text-xs sm:grid-cols-2">
+                    <div>
+                      <span className="text-zinc-500">HR Representative:</span>
+                      <p className="font-bold text-zinc-900">{marketDetails.hrName}</p>
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Official Phone Number:</span>
+                      <p className="font-bold text-zinc-900">{marketDetails.hrPhone}</p>
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Official Email:</span>
+                      <p className="font-bold text-zinc-900">{marketDetails.hrEmail}</p>
+                    </div>
+                    <div>
+                      <span className="text-zinc-500">Reference Number:</span>
+                      <p className="font-mono font-bold text-zinc-900">{application.reference_number}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Acknowledgment and Signatures */}
+                <div className="space-y-4 pt-2">
+                  <h3 className="font-display text-base font-bold text-zinc-950">Acknowledgment and Signatures</h3>
+                  <p className="text-xs text-zinc-600">
+                    By signing below, both parties acknowledge receipt and confirmation of the information contained in this letter.
+                  </p>
+
+                  <div className="grid gap-6 pt-2 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5">
+                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                        For {marketDetails.brandName} (HR Representative)
+                      </span>
+                      <div className="mt-4 space-y-2 text-xs">
+                        <div>
+                          <span className="text-zinc-500">Full Name: </span>
+                          <strong className="text-zinc-900">{marketDetails.hrName}</strong>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">Signature: </span>
+                          <div className="mt-1 font-serif text-lg italic text-blue-900">
+                            {marketDetails.hrName.split(" ")[0]} · {marketDetails.refPrefix} Recruitment
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">Date: </span>
+                          <strong className="text-zinc-900">
+                            {new Date().toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })}
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5">
+                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                        Employee/Candidate Acknowledgment
+                      </span>
+                      <div className="mt-4 space-y-2 text-xs">
+                        <div>
+                          <span className="text-zinc-500">Full Name: </span>
+                          <strong className="text-zinc-900">{application.full_name}</strong>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">Signature: </span>
+                          <span className="text-zinc-400">_________________________________</span>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">Date: </span>
+                          <span className="text-zinc-400">_________________________________</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-200 pt-6">
+                  <div>
+                    <p className="text-xs text-zinc-500">Kind regards,</p>
+                    <p className="text-sm font-bold text-zinc-900">Human Resources Department</p>
+                    <p className="text-xs font-semibold" style={{ color: marketDetails.primaryColor }}>
+                      {marketDetails.brandName}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => downloadLetterHtml(application)}
+                      className="bg-emerald-600 font-bold text-white hover:bg-emerald-500"
+                    >
+                      <Download className="mr-1.5 size-4" /> Download Letter
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => printOrSavePdf(application)}
+                    >
+                      <Printer className="mr-1.5 size-4" /> Print PDF
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </article>
           </div>
         )}
       </div>
