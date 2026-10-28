@@ -98,7 +98,7 @@ function Landing() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
-              <a href="#positions">View Positions & Salaries</a>
+              <a href="#positions">View Positions</a>
             </Button>
           </div>
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground sm:text-sm">
@@ -197,19 +197,19 @@ function Landing() {
         </div>
       </section>
 
-      {/* Positions & Remuneration Section */}
+      {/* Positions Section */}
       <section id="positions" className="border-y border-border bg-secondary/40 py-16">
         <div className="mx-auto max-w-7xl px-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                Approved Positions & Remuneration
+                Approved Orientation Roles
               </span>
               <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
                 What role did you apply and qualify for at {MARKETS[market].name}?
               </h2>
               <p className="mt-1.5 text-xs text-muted-foreground sm:text-sm">
-                Select the position you applied for to review your approved salary, allowances, and schedule orientation.
+                Select your qualified position to proceed. Approved monthly gross salary and allowances will appear directly in your official Acceptance Letter.
               </p>
             </div>
             <Tabs value={market} onValueChange={(v) => setMarket(v as MarketId)} className="w-full sm:w-auto">
@@ -225,9 +225,6 @@ function Landing() {
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {POSITIONS.map((p) => {
-              const salary = salaryFor(p, market);
-              const allowance = allowanceFor(p, market);
-
               return (
                 <div
                   key={p.id}
@@ -238,23 +235,17 @@ function Landing() {
                       <Badge variant="secondary" className="text-xs">
                         {p.category}
                       </Badge>
-                      <span className="font-display text-xl font-black text-emerald-600 dark:text-emerald-400">
-                        {formatKsh(salary)}
+                      <span className="text-[11px] font-medium text-muted-foreground italic">
+                        Detailed in Letter
                       </span>
                     </div>
 
                     <h3 className="mt-3 font-display text-xl font-bold">{p.title}</h3>
-                    <p className="text-xs text-muted-foreground font-medium">per month</p>
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{p.description}</p>
                   </div>
 
                   <div className="mt-5 border-t border-border/60 pt-4">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">{p.allowanceLabel}:</span>
-                      <strong className="text-emerald-700 dark:text-emerald-300 font-bold">{allowance}</strong>
-                    </div>
-
-                    <Button asChild size="sm" className="mt-4 w-full bg-emerald-600 font-bold text-white hover:bg-emerald-500">
+                    <Button asChild size="sm" className="w-full bg-emerald-600 font-bold text-white hover:bg-emerald-500">
                       <Link to="/apply" search={{ market, role: p.id }}>
                         Select Qualified Position <ArrowRight className="ml-1 size-3.5" />
                       </Link>

@@ -415,19 +415,18 @@ export function ApplyPage() {
                           </Badge>
                           <h4 className="mt-1 font-display text-lg font-bold">{p.title}</h4>
                         </div>
-                        <div className="text-right">
-                          <span className="font-display text-lg font-black text-emerald-600 dark:text-emerald-400">
-                            {formatKsh(salary)}
+                        {active && (
+                          <span className="grid size-6 place-items-center rounded-full bg-emerald-600 text-white shadow-sm">
+                            <Check className="size-3.5" />
                           </span>
-                          <p className="text-[10px] text-muted-foreground">per month</p>
-                        </div>
+                        )}
                       </div>
 
                       <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{p.description}</p>
 
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-2 text-xs">
-                        <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                          {p.allowanceLabel}: {allowance}
+                        <span className="text-[11px] text-muted-foreground italic">
+                          Salary & allowances detailed in letter
                         </span>
                         <Button
                           size="sm"
@@ -439,7 +438,7 @@ export function ApplyPage() {
                             handleSelectAndAdvance();
                           }}
                         >
-                          {active ? "Selected ✓" : "Select & Continue →"}
+                          {active ? "Selected ✓" : "Select Position →"}
                         </Button>
                       </div>
                     </div>
@@ -448,14 +447,17 @@ export function ApplyPage() {
               </div>
             </div>
 
-            {/* Compensation Summary & Next Button */}
+            {/* Selected Position Confirmation & Next Button */}
             <div className="flex flex-col items-center justify-between gap-4 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 p-6 sm:flex-row">
               <div>
                 <span className="text-xs uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-semibold">
-                  Selected Package: {selectedPosition.title} at {marketDetails.name}
+                  Selected Qualified Position
                 </span>
-                <p className="mt-1 font-display text-2xl font-black text-emerald-900 dark:text-emerald-200">
-                  {formatKsh(salaryFor(selectedPosition, market))} Gross Salary + {selectedPosition.allowanceLabel} ({allowanceFor(selectedPosition, market)})
+                <p className="mt-1 font-display text-xl sm:text-2xl font-black text-emerald-950 dark:text-emerald-100">
+                  {selectedPosition.title} · {marketDetails.name}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Approved monthly gross salary and allowances will be specified in your authenticated Employment Acceptance Letter.
                 </p>
               </div>
               <Button
