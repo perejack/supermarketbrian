@@ -23,7 +23,7 @@ import {
   Printer,
   Download,
 } from "lucide-react";
-import { downloadLetterHtml, printOrSavePdf, formatLongDate } from "@/lib/letter-generator";
+import { downloadLetterPdf, printOrSavePdf, formatLongDate } from "@/lib/letter-generator";
 import { supabase } from "@/integrations/supabase/client";
 import { createApplication, type ApplicationRow } from "@/lib/app-server";
 import {
@@ -276,8 +276,12 @@ export function ApplyPage() {
     <AppShell>
       <div className="mx-auto max-w-4xl py-2">
         {/* Progress Step Bar */}
-        <div className="mb-8">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-between text-xs font-semibold sm:hidden mb-1.5 px-0.5">
+            <span className="font-bold text-foreground">Step {step} of 5: <span className="text-emerald-600">{stepTitles[step - 1]}</span></span>
+            <span className="font-mono text-emerald-600 font-bold">{Math.round((step / 5) * 100)}%</span>
+          </div>
+          <div className="hidden sm:flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
             {stepTitles.map((title, i) => (
               <span
                 key={title}
@@ -294,7 +298,7 @@ export function ApplyPage() {
               </span>
             ))}
           </div>
-          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-secondary">
+          <div className="mt-1 sm:mt-2 h-2.5 overflow-hidden rounded-full bg-secondary">
             <div
               className="h-full rounded-full bg-emerald-600 transition-all duration-500 ease-out"
               style={{ width: `${(step / 5) * 100}%` }}
@@ -421,15 +425,15 @@ export function ApplyPage() {
 
                       <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{p.description}</p>
 
-                      <div className="mt-3 flex items-center justify-between border-t border-border/50 pt-2 text-xs">
-                        <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-2 text-xs">
+                        <span className="font-semibold text-emerald-700 dark:text-emerald-400">
                           {p.allowanceLabel}: {allowance}
                         </span>
                         <Button
                           size="sm"
                           type="button"
                           variant={active ? "default" : "outline"}
-                          className={active ? "bg-emerald-600 text-white hover:bg-emerald-500" : "group-hover:border-emerald-500 group-hover:text-emerald-600"}
+                          className={`w-full sm:w-auto font-bold ${active ? "bg-emerald-600 text-white hover:bg-emerald-500" : "group-hover:border-emerald-500 group-hover:text-emerald-600"}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSelectAndAdvance();
@@ -588,11 +592,11 @@ export function ApplyPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setStep(1)}>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-border">
+              <Button type="button" variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">
                 Back
               </Button>
-              <Button type="submit" size="lg" className="bg-emerald-600 font-bold text-white hover:bg-emerald-500">
+              <Button type="submit" size="lg" className="w-full sm:w-auto bg-emerald-600 font-bold text-white hover:bg-emerald-500">
                 Proceed to Document Uploads <ArrowRight className="ml-2 size-4" />
               </Button>
             </div>
@@ -717,15 +721,15 @@ export function ApplyPage() {
               </div>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-border">
-              <Button type="button" variant="outline" onClick={() => setStep(2)}>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 border-t border-border">
+              <Button type="button" variant="outline" onClick={() => setStep(2)} className="w-full sm:w-auto">
                 Back
               </Button>
               <Button
                 type="submit"
                 size="lg"
                 disabled={busy}
-                className="bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500"
+                className="w-full sm:w-auto bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500"
               >
                 {busy ? (
                   <>
@@ -741,7 +745,7 @@ export function ApplyPage() {
           </form>
         )}
 
-        {/* STEP 4: M-PESA STK Simulation (KSh 650) */}
+        {/* STEP 4: Live HashBack M-PESA STK Push (KSh 650) */}
         {step === 4 && application && (
           <div className="space-y-6 animate-in fade-in duration-200">
             <div>
@@ -778,41 +782,37 @@ export function ApplyPage() {
                 Orientation Invitation for <strong>{marketDetails.name}</strong> is generated and authenticated.
               </p>
 
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
                 <Button
                   size="lg"
-                  onClick={() => downloadLetterHtml(application)}
-                  className="bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500"
+                  onClick={() => downloadLetterPdf(application)}
+                  className="w-full sm:w-auto bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500"
                 >
-                  <Download className="mr-2 size-5" /> Download Acceptance Letter
+                  <Download className="mr-2 size-5" /> Download Acceptance Letter (PDF)
                 </Button>
 
                 <Button
                   size="lg"
                   variant="outline"
                   onClick={() => printOrSavePdf(application)}
-                  className="border-emerald-600/40 font-semibold text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300"
+                  className="w-full sm:w-auto border-emerald-600/40 font-semibold text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300"
                 >
                   <Printer className="mr-2 size-4" /> Print / Save PDF
-                </Button>
-
-                <Button size="lg" variant="ghost" asChild>
-                  <Link to="/admin">Go to Admin HR Dashboard →</Link>
                 </Button>
               </div>
             </div>
 
             {/* Complete Official Acceptance Letter Rendered Right Here */}
-            <article className="relative overflow-hidden rounded-3xl border border-zinc-300 bg-white p-6 text-zinc-900 shadow-xl dark:border-zinc-800 dark:bg-white dark:text-zinc-900 sm:p-12">
+            <article id="official-letter-doc" className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-300 bg-white p-4 sm:p-12 text-zinc-900 shadow-xl dark:border-zinc-800 dark:bg-white dark:text-zinc-900">
               <div
                 className="absolute left-0 top-0 h-3 w-full"
                 style={{ backgroundColor: marketDetails.primaryColor }}
               />
 
               {/* Letterhead */}
-              <header className="flex flex-col justify-between gap-6 border-b-2 border-zinc-800 pb-6 sm:flex-row sm:items-start">
-                <div className="flex items-start gap-4">
-                  <div className="size-16 shrink-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-1 shadow-sm flex items-center justify-center">
+              <header className="flex flex-col justify-between gap-4 sm:gap-6 border-b-2 border-zinc-800 pb-5 sm:pb-6 sm:flex-row sm:items-start">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className="size-14 sm:size-16 shrink-0 overflow-hidden rounded-xl sm:rounded-2xl border border-zinc-200 bg-white p-1 shadow-sm flex items-center justify-center">
                     <img
                       src={marketDetails.logoUrl}
                       alt={marketDetails.name}
@@ -821,25 +821,25 @@ export function ApplyPage() {
                   </div>
                   <div>
                     <h1
-                      className="font-display text-2xl font-black tracking-tight sm:text-3xl"
+                      className="font-display text-xl sm:text-2xl lg:text-3xl font-black tracking-tight"
                       style={{ color: marketDetails.primaryColor }}
                     >
                       {marketDetails.brandName.toUpperCase()}
                     </h1>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">
+                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-600">
                       Human Resources & Recruitment Directorate
                     </p>
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <p className="mt-0.5 text-[10px] sm:text-xs text-zinc-500">
                       Head Office: Nairobi, Kenya · Official Career Onboarding Portal
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-start rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-xs sm:items-end">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Official Reference</span>
-                  <span className="font-mono text-base font-extrabold text-zinc-900">{application.reference_number}</span>
-                  <span className="mt-1 text-zinc-500">Date Issued: {new Date().toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })}</span>
-                  <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 font-mono text-[11px] font-bold text-emerald-700">
+                <div className="flex flex-col items-start rounded-xl sm:rounded-2xl border border-zinc-200 bg-zinc-50 p-3 sm:p-4 text-xs sm:items-end w-full sm:w-auto">
+                  <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-500">Official Reference</span>
+                  <span className="font-mono text-sm sm:text-base font-extrabold text-zinc-900 break-all">{application.reference_number}</span>
+                  <span className="mt-0.5 text-[11px] text-zinc-500">Date Issued: {new Date().toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })}</span>
+                  <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 font-mono text-[10px] sm:text-[11px] font-bold text-emerald-700">
                     <CheckCircle2 className="size-3" />
                     STATUS: VERIFIED & PAID ({paidReceipt})
                   </div>
@@ -1006,7 +1006,7 @@ export function ApplyPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-200 pt-6">
+                <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-zinc-200 pt-6">
                   <div>
                     <p className="text-xs text-zinc-500">Kind regards,</p>
                     <p className="text-sm font-bold text-zinc-900">Human Resources Department</p>
@@ -1014,18 +1014,19 @@ export function ApplyPage() {
                       {marketDetails.brandName}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Button
                       size="sm"
-                      onClick={() => downloadLetterHtml(application)}
-                      className="bg-emerald-600 font-bold text-white hover:bg-emerald-500"
+                      onClick={() => downloadLetterPdf(application)}
+                      className="w-full sm:w-auto bg-emerald-600 font-bold text-white hover:bg-emerald-500"
                     >
-                      <Download className="mr-1.5 size-4" /> Download Letter
+                      <Download className="mr-1.5 size-4" /> Download PDF
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => printOrSavePdf(application)}
+                      className="w-full sm:w-auto"
                     >
                       <Printer className="mr-1.5 size-4" /> Print PDF
                     </Button>

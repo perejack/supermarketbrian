@@ -72,9 +72,6 @@ function Landing() {
             </Badge>
           </Link>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild className="border-border">
-              <Link to="/admin">Admin HR Console</Link>
-            </Button>
             <Button size="sm" asChild className="bg-emerald-600 font-bold text-white hover:bg-emerald-500">
               <Link to="/apply">Claim Letter</Link>
             </Button>
@@ -83,31 +80,28 @@ function Landing() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-16 pt-12 lg:grid-cols-2 lg:pt-16">
+      <section className="mx-auto grid max-w-7xl items-center gap-8 px-4 pb-12 pt-8 sm:gap-10 sm:px-5 sm:pb-16 sm:pt-16 lg:grid-cols-2">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
             <Award className="size-3.5" /> Interview Passed · Invitation for Orientation
           </span>
-          <h1 className="mt-5 font-display text-5xl font-black leading-[1.08] tracking-tight sm:text-6xl">
+          <h1 className="mt-4 font-display text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
             Congratulations! Your supermarket employment is <span className="text-emerald-600 dark:text-emerald-400">approved.</span>
           </h1>
-          <p className="mt-5 max-w-lg text-lg text-muted-foreground">
+          <p className="mt-4 max-w-lg text-base text-muted-foreground sm:text-lg">
             You have qualified for your applied role and position. Select the supermarket and position you applied for, review your approved salary structure and allowances, upload your ID and CV for verification, and download your official <strong className="text-foreground">Employment Acceptance & Orientation Letter</strong>.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button size="lg" asChild className="bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500">
+          <div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:items-center">
+            <Button size="lg" asChild className="w-full sm:w-auto bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500">
               <Link to="/apply" search={{ market }}>
                 Claim Orientation Letter <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
               <a href="#positions">View Positions & Salaries</a>
             </Button>
-            <Button size="lg" variant="ghost" asChild>
-              <Link to="/admin">HR Admin Records →</Link>
-            </Button>
           </div>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground sm:text-sm">
             <span className="flex items-center gap-1.5">
               <Calendar className="size-4 text-emerald-600" /> Monday, 19th October 2026 Orientation
             </span>
@@ -126,15 +120,15 @@ function Landing() {
             alt="Supermarket staff assisting customer in store aisle"
             width={1600}
             height={900}
-            className="aspect-[4/3] w-full rounded-3xl object-cover shadow-2xl"
+            className="aspect-[4/3] w-full rounded-2xl object-cover shadow-2xl sm:rounded-3xl"
           />
-          <div className="absolute -bottom-6 -left-4 flex items-center gap-3 rounded-2xl border border-border bg-card/95 backdrop-blur px-5 py-4 shadow-xl sm:-left-8">
-            <span className="grid size-12 place-items-center rounded-2xl bg-emerald-600 text-white shadow-md">
-              <CheckCircle2 className="size-6" />
+          <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-card/95 p-3.5 shadow-xl backdrop-blur sm:absolute sm:-bottom-6 sm:-left-6 sm:mt-0 sm:px-5 sm:py-4">
+            <span className="grid size-10 place-items-center rounded-xl bg-emerald-600 text-white shadow-md sm:size-12 sm:rounded-2xl">
+              <CheckCircle2 className="size-5 sm:size-6" />
             </span>
             <div>
-              <p className="text-sm font-bold">RE: INTERVIEW SUCCESSFUL</p>
-              <p className="text-xs text-muted-foreground">Invitation for Orientation · Official Acceptance Letter</p>
+              <p className="text-xs font-bold sm:text-sm">RE: INTERVIEW SUCCESSFUL</p>
+              <p className="text-[11px] text-muted-foreground sm:text-xs">Invitation for Orientation · Official Acceptance Letter</p>
             </div>
           </div>
         </div>
@@ -211,17 +205,17 @@ function Landing() {
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                 Approved Positions & Remuneration
               </span>
-              <h2 className="mt-1 font-display text-3xl font-extrabold tracking-tight">
+              <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
                 What role did you apply and qualify for at {MARKETS[market].name}?
               </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-1.5 text-xs text-muted-foreground sm:text-sm">
                 Select the position you applied for to review your approved salary, allowances, and schedule orientation.
               </p>
             </div>
-            <Tabs value={market} onValueChange={(v) => setMarket(v as MarketId)}>
-              <TabsList className="bg-background">
+            <Tabs value={market} onValueChange={(v) => setMarket(v as MarketId)} className="w-full sm:w-auto">
+              <TabsList className="bg-background w-full sm:w-auto grid grid-cols-3 sm:flex">
                 {MARKET_ORDER.map((id) => (
-                  <TabsTrigger key={id} value={id}>
+                  <TabsTrigger key={id} value={id} className="text-xs sm:text-sm">
                     {MARKETS[id].name}
                   </TabsTrigger>
                 ))}

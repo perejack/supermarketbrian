@@ -305,6 +305,16 @@ export function generateLetterHtml(app: Partial<ApplicationRow>): string {
       color: #18181b;
       border: 1px solid #d4d4d8;
     }
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .sheet { padding: 24px 18px; border-radius: 12px; }
+      .header-row { flex-direction: column; align-items: stretch; gap: 14px; }
+      .meta-box { text-align: left; }
+      .details-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .sig-row { grid-template-columns: 1fr; gap: 16px; }
+      .footer-stamp { flex-direction: column; gap: 8px; text-align: center; }
+    }
     @media print {
       body {
         background: #ffffff;
@@ -444,6 +454,75 @@ export function generateLetterHtml(app: Partial<ApplicationRow>): string {
   </div>
 </body>
 </html>`;
+}
+
+function loadHtml2Pdf(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject("SSR");
+  if ((window as any).html2pdf) {
+    return Promise.resolve((window as any).html2pdf);
+  }
+  return new Promise((resolve, reject) => {
+    const existing = document.getElementById("html2pdf-cdn");
+    if (existing) {
+      existing.addEventListener("load", () => resolve((window as any).html2pdf));
+      existing.addEventListener("error", reject);
+      return;
+    }
+    const s = document.createElement("script");
+    s.id = "html2pdf-cdn";
+    s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    s.onload = () => resolve((window as any).html2pdf);
+    s.onerror = (e) => reject(e);
+    document.head.appendChild(s);
+  });
+}
+
+export async function downloadLetterPdf(app: Partial<ApplicationRow>): Promise<void> {
+  const marketId: MarketId = isMarketId(app.supermarket) ? app.supermarket : "carrefour";
+  const market = MARKETS[marketId] || MARKETS.carrefour;
+  const ref = app.reference_number || "LETTER";
+  const filename = `${market.name}_Acceptance_Letter_${ref}.pdf`;
+
+  const toastId = toast.loading("Generating your official PDF letter...");
+
+  try {
+    const html2pdf = await loadHtml2Pdf();
+
+    let targetEl = document.getElementById("employment-letter") || document.getElementById("official-letter-doc");
+    let tempContainer: HTMLElement | null = null;
+
+    if (!targetEl) {
+      tempContainer = document.createElement("div");
+      tempContainer.style.position = "fixed";
+      tempContainer.style.left = "-9999px";
+      tempContainer.style.top = "0";
+      tempContainer.style.width = "800px";
+      tempContainer.style.background = "#ffffff";
+      tempContainer.innerHTML = generateLetterHtml(app);
+      document.body.appendChild(tempContainer);
+      targetEl = (tempContainer.querySelector(".sheet") as HTMLElement) || tempContainer;
+    }
+
+    const opt = {
+      margin: [8, 8, 8, 8],
+      filename: filename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
+
+    await html2pdf().set(opt).from(targetEl).save();
+
+    if (tempContainer) {
+      document.body.removeChild(tempContainer);
+    }
+
+    toast.success("Acceptance Letter downloaded as PDF!", { id: toastId });
+  } catch (err) {
+    console.warn("Direct PDF generation fallback:", err);
+    toast.dismiss(toastId);
+    printOrSavePdf(app);
+  }
 }
 
 export function downloadLetterHtml(app: Partial<ApplicationRow>): void {

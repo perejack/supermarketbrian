@@ -21,7 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getLetterByRef, type ApplicationRow } from "@/lib/app-server";
 import { MARKETS, POSITIONS, formatKsh, ORIENTATION_TIME, type MarketId, isMarketId } from "@/lib/jobs";
-import { downloadLetterHtml, printOrSavePdf } from "@/lib/letter-generator";
+import { downloadLetterPdf, printOrSavePdf } from "@/lib/letter-generator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -294,10 +294,10 @@ function LetterPage() {
 
           <Button
             size="sm"
-            onClick={() => downloadLetterHtml(letter)}
+            onClick={() => downloadLetterPdf(letter)}
             className="gap-2 bg-emerald-600 font-bold text-white shadow-md hover:bg-emerald-500"
           >
-            <Download className="size-4" /> Download Letter
+            <Download className="size-4" /> Download Letter (PDF)
           </Button>
 
           <Button

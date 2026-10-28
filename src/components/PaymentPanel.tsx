@@ -4,7 +4,6 @@ import {
   Loader2,
   CheckCircle2,
   ShieldCheck,
-  Zap,
   ArrowRight,
   Lock,
   RefreshCw,
@@ -28,7 +27,7 @@ interface PaymentPanelProps {
   onPaid: (receipt: string) => void;
 }
 
-type Stage = "form" | "polling" | "sim-pin" | "success";
+type Stage = "form" | "polling" | "success";
 
 export function PaymentPanel({
   applicationId,
@@ -45,7 +44,6 @@ export function PaymentPanel({
   const [pollAttempt, setPollAttempt] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [simPin, setSimPin] = useState("");
 
   const cancelPollRef = useRef<(() => void) | null>(null);
   const finishTimerRef = useRef<any>(null);
@@ -121,33 +119,6 @@ export function PaymentPanel({
       cancelPollRef.current = stopPolling;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Network error contacting M-Pesa gateway");
-      setBusy(false);
-    }
-  }
-
-  // Instant Simulator fallback
-  async function handleSimulatedPayment() {
-    setBusy(true);
-    await new Promise((r) => setTimeout(r, 900));
-
-    try {
-      const res = await confirmMpesaPayment({
-        data: {
-          applicationId,
-          phone: phone.trim() || "0712 345 678",
-        },
-      });
-
-      setReceipt(res.receipt);
-      setStage("success");
-
-      finishTimerRef.current = setTimeout(() => {
-        onPaid(res.receipt);
-      }, 1500);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Simulated payment failed");
-      setStage("form");
-    } finally {
       setBusy(false);
     }
   }
@@ -238,13 +209,6 @@ export function PaymentPanel({
             >
               Cancel / Change Number
             </Button>
-            <Button
-              size="sm"
-              onClick={handleSimulatedPayment}
-              className="bg-emerald-700 text-white hover:bg-emerald-600"
-            >
-              <Zap className="mr-1.5 size-3.5" /> Quick Confirm (Bypass Wait)
-            </Button>
           </div>
         </div>
       )}
@@ -282,59 +246,7 @@ export function PaymentPanel({
         </div>
       )}
 
-      {/* STATE 3: SIMULATED PIN OVERLAY (OPTIONAL TEST MODE) */}
-      {stage === "sim-pin" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-sm overflow-hidden rounded-3xl border-2 border-emerald-500 bg-zinc-950 text-white shadow-2xl">
-            <div className="flex items-center justify-between bg-zinc-900 px-5 py-2.5 text-xs text-zinc-400">
-              <span className="font-semibold text-emerald-400">SIM 1 · Safaricom M-PESA</span>
-              <span>{formattedTime}</span>
-            </div>
-            <div className="p-6 text-center">
-              <div className="mx-auto mb-3 grid size-12 place-items-center rounded-2xl bg-emerald-600 text-white">
-                <Smartphone className="size-6" />
-              </div>
-              <h3 className="font-display text-lg font-bold">Lipa na M-PESA</h3>
-              <div className="my-4 rounded-2xl bg-zinc-900 p-4 text-left text-xs text-zinc-300">
-                <p className="text-zinc-500">Pay To:</p>
-                <p className="font-bold text-white">JOBS PORTAL RECRUITMENT</p>
-                <div className="mt-2 flex justify-between border-t border-zinc-800 pt-2">
-                  <span className="text-zinc-500">Account:</span>
-                  <span className="font-mono font-bold text-emerald-400">{referenceNumber}</span>
-                </div>
-                <div className="mt-1 flex justify-between">
-                  <span className="text-zinc-500">Amount:</span>
-                  <span className="font-bold text-white">{formatKsh(APPLICATION_FEE)}.00</span>
-                </div>
-              </div>
-
-              <div className="space-y-2 text-left">
-                <Label className="text-xs text-zinc-300">Enter M-PESA PIN (e.g. 1234):</Label>
-                <Input
-                  type="password"
-                  maxLength={4}
-                  autoFocus
-                  placeholder="• • • •"
-                  value={simPin}
-                  onChange={(e) => setSimPin(e.target.value.replace(/\D/g, ""))}
-                  className="h-12 border-emerald-500/50 bg-zinc-900 text-center font-mono text-2xl tracking-widest text-emerald-400"
-                />
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <Button variant="outline" onClick={() => setStage("form")} className="border-zinc-800 text-zinc-300">
-                  Cancel
-                </Button>
-                <Button onClick={handleSimulatedPayment} disabled={busy} className="bg-emerald-600 font-bold text-white">
-                  {busy ? <Loader2 className="size-4 animate-spin" /> : "Send PIN"}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STATE 4: DEFAULT PAYMENT FORM */}
+      {/* STATE 3: DEFAULT PAYMENT FORM */}
       {stage === "form" && (
         <form onSubmit={handleLiveSTKPush} className="mt-6 space-y-5">
           <div className="rounded-2xl bg-secondary/60 p-4 text-xs text-muted-foreground">
@@ -380,12 +292,12 @@ export function PaymentPanel({
             </div>
           )}
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+          <div className="pt-2">
             <Button
               type="submit"
               size="lg"
               disabled={busy || phone.replace(/\D/g, "").length < 9}
-              className="flex-1 bg-emerald-600 font-extrabold text-white shadow-xl shadow-emerald-600/25 hover:bg-emerald-500"
+              className="w-full bg-emerald-600 font-extrabold text-white shadow-xl shadow-emerald-600/25 hover:bg-emerald-500"
             >
               {busy ? (
                 <>
@@ -396,16 +308,6 @@ export function PaymentPanel({
                   <Smartphone className="mr-2 size-5" /> Send Real M-PESA STK Push (KSh {APPLICATION_FEE})
                 </>
               )}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              onClick={() => setStage("sim-pin")}
-              className="border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
-            >
-              <Zap className="mr-1.5 size-4" /> Simulate PIN (Offline Test)
             </Button>
           </div>
 

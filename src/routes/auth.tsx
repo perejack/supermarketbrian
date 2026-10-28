@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ShoppingBasket, ArrowRight, Lock, Sparkles, BadgeCheck, Zap, ShieldCheck } from "lucide-react";
+import { ShoppingBasket, ArrowRight, Lock, Sparkles, BadgeCheck, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,34 +82,6 @@ function AuthPage() {
     }
   }
 
-  async function handleInstantDemoLogin() {
-    setBusy(true);
-    const demoEmail = `candidate.${Math.floor(1000 + Math.random() * 9000)}@kazilink.demo`;
-    const demoPassword = "KaziDemoPassword2026!";
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: demoEmail,
-        password: demoPassword,
-      });
-
-      if (error) {
-        // Fallback: try signing in if exists
-        await supabase.auth.signInWithPassword({
-          email: demoEmail,
-          password: demoPassword,
-        });
-      }
-      toast.success("Welcome! Signed in as demo applicant.");
-      go();
-    } catch (e) {
-      toast.info("Entering demo portal directly...");
-      go();
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Brand side */}
@@ -163,37 +135,6 @@ function AuthPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               Sign in to verify your qualified appointment and download your orientation letter.
             </p>
-          </div>
-
-          {/* Instant 1-Click Demo Login Banner */}
-          <div className="rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/10 p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-display font-bold text-emerald-800 dark:text-emerald-300">
-                  Quick Showcase Access
-                </p>
-                <p className="mt-0.5 text-xs text-emerald-700/90 dark:text-emerald-400/90">
-                  Bypass manual credentials and jump straight into the application workflow.
-                </p>
-              </div>
-              <Button
-                type="button"
-                onClick={handleInstantDemoLogin}
-                disabled={busy}
-                className="bg-emerald-600 font-bold text-white shadow-md hover:bg-emerald-500"
-              >
-                <Zap className="mr-1.5 size-4" /> 1-Click Demo Login
-              </Button>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or sign in with email</span>
-            </div>
           </div>
 
           <Tabs defaultValue="signin" className="w-full">

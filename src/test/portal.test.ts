@@ -90,8 +90,8 @@ describe("Job Employment Portal Configuration", () => {
     expect(guards.allowanceValue).toBe("KSh 3,500");
   });
 
-  it("has application fee configured as KSh 10 for testing", () => {
-    expect(APPLICATION_FEE).toBe(10);
+  it("has application fee configured as KSh 650", () => {
+    expect(APPLICATION_FEE).toBe(650);
   });
 
   it("resolves route tree for /admin, /apply, and /letter", () => {

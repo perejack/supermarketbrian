@@ -4,7 +4,7 @@ import { useRouter } from "@tanstack/react-router";
 import { BadgeCheck, Clock3, FilePlus2, FileText, Loader2, Wallet, Download, Printer } from "lucide-react";
 import { getMyApplications, type ApplicationRow } from "@/lib/app-server";
 import { MARKETS, formatKsh, type MarketId } from "@/lib/jobs";
-import { downloadLetterHtml, printOrSavePdf } from "@/lib/letter-generator";
+import { downloadLetterPdf, printOrSavePdf } from "@/lib/letter-generator";
 import { PaymentPanel } from "@/components/PaymentPanel";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -102,9 +102,9 @@ function DashboardPage() {
                   <div className="flex items-center gap-2">
                     <Button
                       className="gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-500 text-white"
-                      onClick={() => downloadLetterHtml(app)}
+                      onClick={() => downloadLetterPdf(app)}
                     >
-                      <Download className="size-4" /> Download Letter
+                      <Download className="size-4" /> Download PDF Letter
                     </Button>
                     <Button
                       variant="outline"
