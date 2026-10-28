@@ -1,0 +1,13 @@
+name = "kazilink-supermarket-portal"
+compatibility_date = "2026-10-28"
+compatibility_flags = ["nodejs_compat"]
+
+[site]
+bucket = ".output/public"
+
+[build]
+command = "npm run build"
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.mjs", "**/*.js"]
