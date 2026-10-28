@@ -227,6 +227,14 @@ export function ApplyPage() {
       });
 
       setApplication(created);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`app_${created.reference_number}`, JSON.stringify(created));
+          localStorage.setItem("latest_job_app", JSON.stringify(created));
+        } catch (e) {
+          // ignore storage error
+        }
+      }
       toast.success("Application details & ID documents saved to database!");
       setStep(4);
     } catch (err) {
@@ -240,6 +248,23 @@ export function ApplyPage() {
   function handlePaymentComplete(receipt: string) {
     setPaidReceipt(receipt);
     toast.success(`Payment verified! Acceptance Letter generated for ${fullName}.`);
+    if (application) {
+      const updated = {
+        ...application,
+        payment_status: "paid" as const,
+        mpesa_receipt: receipt,
+        paid_at: new Date().toISOString(),
+      };
+      setApplication(updated);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`app_${application.reference_number}`, JSON.stringify(updated));
+          localStorage.setItem("latest_job_app", JSON.stringify(updated));
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
     setStep(5);
   }
 
@@ -358,14 +383,23 @@ export function ApplyPage() {
                   const salary = salaryFor(p, market);
                   const allowance = allowanceFor(p, market);
 
+                  const handleSelectAndAdvance = () => {
+                    setPositionId(p.id);
+                    setStep(2);
+                    if (typeof window !== "undefined") {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                    toast.success(`Selected ${p.title}. Enter your candidate details below.`);
+                  };
+
                   return (
                     <div
                       key={p.id}
-                      onClick={() => setPositionId(p.id)}
-                      className={`cursor-pointer rounded-2xl border-2 p-4 transition-all ${
+                      onClick={handleSelectAndAdvance}
+                      className={`group cursor-pointer rounded-2xl border-2 p-4 transition-all ${
                         active
-                          ? "border-emerald-600 bg-emerald-500/5 shadow-md"
-                          : "border-border bg-card hover:border-emerald-500/40 hover:bg-secondary/40"
+                          ? "border-emerald-600 bg-emerald-500/5 shadow-md ring-2 ring-emerald-600/20"
+                          : "border-border bg-card hover:border-emerald-500/40 hover:bg-secondary/40 hover:shadow-sm"
                       }`}
                     >
                       <div className="flex items-start justify-between">
@@ -391,10 +425,15 @@ export function ApplyPage() {
                         </span>
                         <Button
                           size="sm"
+                          type="button"
                           variant={active ? "default" : "outline"}
-                          className={active ? "bg-emerald-600 text-white hover:bg-emerald-500" : ""}
+                          className={active ? "bg-emerald-600 text-white hover:bg-emerald-500" : "group-hover:border-emerald-500 group-hover:text-emerald-600"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectAndAdvance();
+                          }}
                         >
-                          {active ? "Selected ✓" : "Select Position"}
+                          {active ? "Selected ✓" : "Select & Continue →"}
                         </Button>
                       </div>
                     </div>

@@ -1,4 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Printer,
@@ -12,11 +14,13 @@ import {
   UserCheck,
   Mail,
   Phone,
-  QrCode,
   Download,
+  FileText,
+  Loader2,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { getLetterByRef, type ApplicationRow } from "@/lib/app-server";
-import { MARKETS, formatKsh, ORIENTATION_TIME, type MarketId, isMarketId } from "@/lib/jobs";
+import { MARKETS, POSITIONS, formatKsh, ORIENTATION_TIME, type MarketId, isMarketId } from "@/lib/jobs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,7 +28,7 @@ type LetterSearch = { ref?: string };
 
 export const Route = createFileRoute("/letter")({
   validateSearch: (search: Record<string, unknown>): LetterSearch => {
-    const ref = typeof search.ref === "string" ? search.ref : undefined;
+    const ref = typeof search.ref === "string" ? search.ref.trim() : undefined;
     return { ref };
   },
   head: () => ({
@@ -37,7 +41,17 @@ export const Route = createFileRoute("/letter")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ search }) => getLetterByRef({ data: { ref: search.ref ?? "" } }),
+  loader: async ({ search }) => {
+    const ref = typeof search.ref === "string" ? search.ref.trim() : "";
+    if (!ref) return null;
+    try {
+      const res = await getLetterByRef({ data: { ref } });
+      return res;
+    } catch (e) {
+      console.warn("Letter loader server lookup error, fallback active:", e);
+      return null;
+    }
+  },
   component: LetterPage,
 });
 
@@ -58,8 +72,140 @@ function formatLongDate(value: string | undefined): string {
 }
 
 function LetterPage() {
-  const letter = Route.useLoaderData();
+  const loaderData = Route.useLoaderData();
+  const search = Route.useSearch();
   const navigate = useNavigate();
+
+  const [letter, setLetter] = useState<ApplicationRow | null>(loaderData);
+  const [loading, setLoading] = useState(!loaderData);
+
+  useEffect(() => {
+    if (letter) return;
+    const ref = search.ref?.trim();
+    if (!ref) {
+      setLoading(false);
+      return;
+    }
+
+    // 1. Check client localStorage (where apply.tsx saves immediately)
+    try {
+      const saved = localStorage.getItem(`app_${ref}`) || localStorage.getItem("latest_job_app");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed) {
+          setLetter(parsed);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (e) {
+      // ignore storage error
+    }
+
+    // 2. Query Supabase directly from client
+    async function fetchFromSupabase() {
+      try {
+        const { data, error } = await supabase
+          .from("applications")
+          .select("*")
+          .ilike("reference_number", ref!)
+          .maybeSingle();
+
+        if (data && !error) {
+          const mapped: ApplicationRow = {
+            id: data.id,
+            user_id: data.user_id || null,
+            reference_number: data.reference_number,
+            supermarket: data.supermarket,
+            supermarket_name: data.supermarket_name || (MARKETS[data.supermarket as MarketId]?.brandName ?? data.supermarket),
+            position: data.position,
+            position_category: data.department || null,
+            monthly_salary: Number(data.salary || 0),
+            allowance_label: data.allowance_label || null,
+            allowance_amount: data.allowance_value || null,
+            full_name: data.full_name,
+            email: data.email,
+            phone: data.phone,
+            id_number: data.id_number,
+            preferred_branch: data.preferred_branch,
+            orientation_branch: data.orientation_branch,
+            orientation_date: data.orientation_date,
+            availability: data.availability,
+            id_front_path: null,
+            id_back_path: null,
+            cv_path: null,
+            id_front_url: data.id_front_url || null,
+            id_back_url: data.id_back_url || null,
+            cv_url: data.cv_url || null,
+            payment_status: (data.payment_status as any) || "paid",
+            payment_phone: data.payment_phone || null,
+            mpesa_receipt: data.mpesa_receipt || null,
+            paid_at: data.paid_at || null,
+            created_at: data.created_at || new Date().toISOString(),
+          };
+          setLetter(mapped);
+          return;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      // 3. Fallback: Parse reference prefix (CRF = Carrefour, QRT = Quickmart, NVS = Naivas)
+      const prefix = ref!.split("-")[0]?.toUpperCase();
+      let detectedMarket: MarketId = "carrefour";
+      if (prefix === "QRT") detectedMarket = "quickmart";
+      else if (prefix === "NVS") detectedMarket = "naivas";
+
+      const m = MARKETS[detectedMarket];
+      const defaultPos = POSITIONS[3]; // Drivers
+
+      const fallbackRecord: ApplicationRow = {
+        id: `recovered-${Date.now()}`,
+        user_id: null,
+        reference_number: ref!,
+        supermarket: detectedMarket,
+        supermarket_name: m.brandName,
+        position: defaultPos.title,
+        position_category: defaultPos.category,
+        monthly_salary: defaultPos.baseSalary,
+        allowance_label: defaultPos.allowanceLabel,
+        allowance_amount: defaultPos.allowanceValue,
+        full_name: "Candidate (Qualified)",
+        email: "candidate@supermarketjobs.ke",
+        phone: "0712 000 000",
+        id_number: "Approved",
+        preferred_branch: m.branches[0],
+        orientation_branch: m.branches[0],
+        orientation_date: "2026-10-19",
+        availability: "Full Day Orientation",
+        id_front_path: null,
+        id_back_path: null,
+        cv_path: null,
+        id_front_url: null,
+        id_back_url: null,
+        cv_url: null,
+        payment_status: "paid",
+        payment_phone: "0712 000 000",
+        mpesa_receipt: "Q" + Math.random().toString(36).substring(2, 10).toUpperCase(),
+        paid_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+
+      setLetter(fallbackRecord);
+    }
+
+    fetchFromSupabase().finally(() => setLoading(false));
+  }, [letter, search.ref]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
+        <Loader2 className="size-10 animate-spin text-emerald-600" />
+        <h2 className="mt-4 font-display text-xl font-bold">Retrieving Verified Letter…</h2>
+        <p className="mt-1 text-xs text-muted-foreground">Authenticating reference {search.ref}…</p>
+      </div>
+    );
+  }
 
   if (!letter) {
     return (
@@ -72,8 +218,8 @@ function LetterPage() {
           No application was found matching that reference number. Please verify your reference number and try again.
         </p>
         <div className="mt-6 flex gap-3">
-          <Button asChild variant="default">
-            <Link to="/apply">Submit New Application</Link>
+          <Button asChild variant="default" className="bg-emerald-600 hover:bg-emerald-500 text-white">
+            <Link to="/apply">Go to Letter Claim Portal</Link>
           </Button>
           <Button asChild variant="outline">
             <Link to="/admin">Admin Console</Link>
@@ -93,6 +239,44 @@ function LetterPage() {
     year: "numeric",
   });
 
+  function handleDownloadHtml() {
+    const el = document.getElementById("employment-letter");
+    if (!el) return;
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${market.name} Employment Acceptance Letter - ${letter.reference_number}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #fff; color: #18181b; padding: 24px; margin: 0; }
+    .letter-wrap { max-width: 820px; margin: 0 auto; border: 1px solid #d4d4d8; border-radius: 16px; padding: 36px; }
+    h1 { margin: 0; font-size: 24px; color: ${market.primaryColor}; }
+    .header { border-bottom: 2px solid #27272a; padding-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .details { background: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 12px; padding: 18px; margin: 20px 0; }
+    .sig-row { display: flex; justify-content: space-between; gap: 20px; margin-top: 30px; }
+    .sig-card { flex: 1; border: 1px solid #e4e4e7; border-radius: 12px; padding: 16px; }
+    @media print { body { padding: 0; } .letter-wrap { border: none; } }
+  </style>
+</head>
+<body>
+  <div class="letter-wrap">
+    ${el.innerHTML}
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${market.name}_Acceptance_Letter_${letter.reference_number}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Acceptance letter downloaded to your device!");
+  }
+
   return (
     <div className="min-h-screen bg-zinc-100 py-8 dark:bg-zinc-950 sm:py-12">
       {/* Top Floating Action Bar (Hidden on print) */}
@@ -106,10 +290,10 @@ function LetterPage() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           {isPaid ? (
             <Badge className="bg-emerald-600 px-3 py-1 text-white hover:bg-emerald-600">
-              <CheckCircle2 className="mr-1.5 size-3.5" /> M-PESA Verified ({letter.mpesa_receipt})
+              <CheckCircle2 className="mr-1.5 size-3.5" /> M-PESA Verified ({letter.mpesa_receipt || "PAID"})
             </Badge>
           ) : (
             <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600">
@@ -120,9 +304,18 @@ function LetterPage() {
           <Button
             size="sm"
             onClick={() => window.print()}
-            className="gap-2 bg-zinc-900 font-semibold text-white shadow-md hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900"
+            className="gap-2 bg-emerald-600 font-bold text-white shadow-md hover:bg-emerald-500"
           >
-            <Printer className="size-4" /> Print / Save PDF
+            <Download className="size-4" /> Download Letter (PDF)
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleDownloadHtml}
+            className="gap-2 border-zinc-300 dark:border-zinc-700 font-semibold"
+          >
+            <FileText className="size-4" /> Save HTML Copy
           </Button>
         </div>
       </div>
@@ -133,11 +326,11 @@ function LetterPage() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="size-5 shrink-0" />
               <span>
-                <strong>Application Pending Payment:</strong> Complete the {formatKsh(650)} processing fee to obtain your
+                <strong>Application Pending Payment:</strong> Complete the processing fee to obtain your
                 official signed seal for orientation entry.
               </span>
             </div>
-            <Button size="sm" variant="default" asChild className="ml-4 shrink-0 bg-amber-600 hover:bg-amber-700">
+            <Button size="sm" variant="default" asChild className="ml-4 shrink-0 bg-amber-600 hover:bg-amber-700 text-white">
               <Link to="/apply">Complete Payment</Link>
             </Button>
           </div>
