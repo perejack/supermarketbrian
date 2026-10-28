@@ -17,10 +17,10 @@ export const Route = createFileRoute("/auth")({
   },
   head: () => ({
     meta: [
-      { title: "Sign in — KaziLink" },
-      { name: "description", content: "Sign in or create your KaziLink account to start your supermarket job application." },
-      { property: "og:title", content: "Sign in — KaziLink" },
-      { property: "og:description", content: "Sign in to start your supermarket job application." },
+      { title: "Sign in — Jobs Portal" },
+      { name: "description", content: "Sign in to Jobs Portal to verify your qualified status and download your supermarket orientation letter." },
+      { property: "og:title", content: "Sign in — Jobs Portal" },
+      { property: "og:description", content: "Sign in to download your supermarket orientation letter." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -119,8 +119,8 @@ function AuthPage() {
             <ShoppingBasket className="size-6" />
           </span>
           <div>
-            <span className="font-display text-2xl font-black tracking-tight">KaziLink</span>
-            <p className="text-xs text-zinc-400">Kenya Retail Recruitment Portal</p>
+            <span className="font-display text-2xl font-black tracking-tight">Jobs Portal</span>
+            <p className="text-xs text-zinc-400">Kenya Retail Employment Verification</p>
           </div>
         </Link>
 
@@ -129,27 +129,26 @@ function AuthPage() {
             <Sparkles className="size-3.5" /> Quickmart · Carrefour · Naivas
           </span>
           <h2 className="font-display text-4xl font-extrabold leading-tight">
-            Apply once. Get placed in Kenya's top supermarket chains.
+            Interview Passed? Claim your Official Orientation Letter.
           </h2>
           <p className="text-sm leading-relaxed text-zinc-400">
-            Select your preferred supermarket, upload your ID and CV, complete the official KSh 650 application processing
-            fee via M-Pesa STK push, and download your authenticated Employment Acceptance Letter.
+            Candidates who qualified for Quickmart, Carrefour, or Naivas: select your position, verify your details, complete the processing fee, and download your official invitation letter.
           </p>
 
           <div className="grid grid-cols-2 gap-3 pt-2 text-xs text-zinc-300">
             <div className="flex items-center gap-2 rounded-xl bg-zinc-900/80 p-3 border border-zinc-800">
               <BadgeCheck className="size-4 text-emerald-400" />
-              <span>10 Verified Roles</span>
+              <span>10 Qualified Roles</span>
             </div>
             <div className="flex items-center gap-2 rounded-xl bg-zinc-900/80 p-3 border border-zinc-800">
               <ShieldCheck className="size-4 text-emerald-400" />
-              <span>Instant Acceptance Letter</span>
+              <span>Verified Acceptance Letter</span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center justify-between text-xs text-zinc-500">
-          <span>© 2026 KaziLink Recruitment</span>
+          <span>© 2026 Jobs Portal Recruitment</span>
           <Link to="/admin" className="text-emerald-400 hover:underline">
             Admin HR Portal →
           </Link>
@@ -160,9 +159,9 @@ function AuthPage() {
       <div className="flex items-center justify-center bg-background p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
           <div>
-            <h1 className="font-display text-3xl font-extrabold tracking-tight">Welcome to KaziLink</h1>
+            <h1 className="font-display text-3xl font-extrabold tracking-tight">Welcome to Jobs Portal</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Sign in or get started instantly with our 1-click candidate demo.
+              Sign in to verify your qualified appointment and download your orientation letter.
             </p>
           </div>
 

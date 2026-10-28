@@ -269,7 +269,7 @@ export function PaymentPanel({
                 <div className="mt-2 rounded-xl bg-background/90 p-3.5 font-mono text-xs text-foreground shadow-sm">
                   <p className="leading-relaxed">
                     <strong>{receipt}</strong> Confirmed. Ksh{APPLICATION_FEE}.00 paid to{" "}
-                    <strong>KAZILINK HR RECRUITMENT</strong> on {formattedDate} at {formattedTime}. Account:{" "}
+                    <strong>JOBS PORTAL RECRUITMENT</strong> on {formattedDate} at {formattedTime}. Account:{" "}
                     <strong>{referenceNumber}</strong>. New M-PESA balance verified. Transaction cost Ksh 0.00.
                   </p>
                 </div>
@@ -297,7 +297,7 @@ export function PaymentPanel({
               <h3 className="font-display text-lg font-bold">Lipa na M-PESA</h3>
               <div className="my-4 rounded-2xl bg-zinc-900 p-4 text-left text-xs text-zinc-300">
                 <p className="text-zinc-500">Pay To:</p>
-                <p className="font-bold text-white">KAZILINK HR RECRUITMENT</p>
+                <p className="font-bold text-white">JOBS PORTAL RECRUITMENT</p>
                 <div className="mt-2 flex justify-between border-t border-zinc-800 pt-2">
                   <span className="text-zinc-500">Account:</span>
                   <span className="font-mono font-bold text-emerald-400">{referenceNumber}</span>

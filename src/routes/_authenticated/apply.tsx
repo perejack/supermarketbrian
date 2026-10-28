@@ -60,14 +60,14 @@ export const Route = createFileRoute("/_authenticated/apply")({
   },
   head: () => ({
     meta: [
-      { title: "Supermarket Job Application — KaziLink" },
+      { title: "Candidate Appointment Verification & Orientation — Jobs Portal" },
       {
         name: "description",
         content:
-          "Apply to Quickmart, Carrefour or Naivas. Upload your ID & CV, pay the processing fee and download your acceptance letter.",
+          "Official Jobs Portal for Quickmart, Carrefour, and Naivas. Confirm your qualified position, upload your ID and CV, pay the letter processing fee, and download your signed acceptance letter.",
       },
-      { property: "og:title", content: "Supermarket Job Application" },
-      { property: "og:description", content: "Fast recruitment and onboarding orientation letters." },
+      { property: "og:title", content: "Supermarket Orientation & Letter Download — Jobs Portal" },
+      { property: "og:description", content: "Verify appointment and download your orientation letter." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -279,11 +279,14 @@ export function ApplyPage() {
         {step === 1 && (
           <div className="space-y-8 animate-in fade-in duration-200">
             <div>
-              <h1 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Select Your Supermarket & Position
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                <Sparkles className="size-3.5" /> Qualified Candidate Onboarding
+              </div>
+              <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Confirm Your Supermarket & Position
               </h1>
               <p className="mt-1.5 text-sm text-muted-foreground">
-                Choose the retail chain and department role you are applying for. Remuneration and orientation packages are pre-configured.
+                Select the supermarket and role you applied for and passed the interview. Remuneration, orientation venue, and official acceptance letters are generated for your selection.
               </p>
             </div>
 
@@ -299,17 +302,21 @@ export function ApplyPage() {
                     onClick={() => pickMarket(id)}
                     className={`relative flex flex-col justify-between rounded-3xl border-2 p-5 text-left transition-all ${
                       active
-                        ? "border-emerald-600 bg-emerald-500/5 shadow-lg shadow-emerald-600/10"
+                        ? "border-emerald-600 bg-emerald-500/5 shadow-lg shadow-emerald-600/10 ring-2 ring-emerald-600/20"
                         : "border-border bg-card hover:border-border/80 hover:bg-secondary/30"
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between">
-                        <div
-                          className="grid size-12 place-items-center rounded-2xl text-2xl font-black text-white shadow-md"
-                          style={{ backgroundColor: m.primaryColor }}
-                        >
-                          {m.logoLetter}
+                        <div className="size-14 overflow-hidden rounded-2xl border border-border/80 bg-white p-1 shadow-sm flex items-center justify-center">
+                          <img
+                            src={m.logoUrl}
+                            alt={m.name}
+                            className="size-full object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = "none";
+                            }}
+                          />
                         </div>
                         {active && (
                           <span className="grid size-6 place-items-center rounded-full bg-emerald-600 text-white">

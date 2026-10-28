@@ -80,17 +80,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "KaziLink — Supermarket Jobs Kenya (Demo)" },
+      { title: "Jobs Portal — Kenya Supermarket Employment Approval & Orientation" },
       {
         name: "description",
         content:
-          "Apply to Quickmart, Carrefour and Naivas in minutes. Upload your ID and CV, pay the processing fee, and get your acceptance letter. Demo proof of concept.",
+          "Official Jobs Portal for Quickmart, Carrefour, and Naivas. Confirm your interview qualification, verify orientation details, upload documents, and download your approved employment letter.",
       },
-      { name: "author", content: "KaziLink" },
-      { property: "og:title", content: "KaziLink — Supermarket Jobs Kenya" },
+      { name: "author", content: "Jobs Portal" },
+      { property: "og:title", content: "Jobs Portal — Supermarket Employment Approval" },
       {
         property: "og:description",
-        content: "Apply to Quickmart, Carrefour and Naivas in minutes. Demo proof of concept.",
+        content: "Qualified candidate verification and orientation letter download for Quickmart, Carrefour, and Naivas.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

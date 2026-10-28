@@ -29,9 +29,9 @@ export const Route = createFileRoute("/letter")({
   },
   head: () => ({
     meta: [
-      { title: "Employment Acceptance Letter — KaziLink" },
+      { title: "Official Employment Acceptance Letter — Jobs Portal" },
       { name: "description", content: "Official supermarket employment acceptance letter and orientation invitation." },
-      { property: "og:title", content: "Official Employment Acceptance Letter" },
+      { property: "og:title", content: "Official Employment Acceptance Letter — Jobs Portal" },
       { property: "og:description", content: "Supermarket invitation for orientation and employment acceptance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -158,11 +158,15 @@ function LetterPage() {
         {/* Letterhead Header */}
         <header className="flex flex-col justify-between gap-6 border-b-2 border-zinc-800 pb-8 sm:flex-row sm:items-start">
           <div className="flex items-start gap-4">
-            <div
-              className="grid size-16 shrink-0 place-items-center rounded-2xl text-3xl font-black text-white shadow-md"
-              style={{ backgroundColor: market.primaryColor }}
-            >
-              {market.logoLetter}
+            <div className="size-16 shrink-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-1 shadow-sm flex items-center justify-center">
+              <img
+                src={market.logoUrl}
+                alt={market.name}
+                className="size-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
             </div>
             <div>
               <h1 className="font-display text-2xl font-black tracking-tight sm:text-3xl" style={{ color: market.primaryColor }}>

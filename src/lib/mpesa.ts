@@ -46,7 +46,7 @@ export class MpesaService {
   ): Promise<STKResponse> {
     const formattedPhone = this.formatPhone(phoneNumber);
     const roundedAmount = Math.max(1, Math.round(Number(amount)));
-    const ref = reference || `KAZILINK-${Date.now()}`;
+    const ref = reference || `JOBSPORTAL-${Date.now()}`;
 
     // 1. First attempt: call local / Vercel API endpoint
     try {
@@ -60,7 +60,7 @@ export class MpesaService {
           phoneNumber: formattedPhone,
           amount: roundedAmount,
           reference: ref,
-          referencePrefix: "KAZILINK",
+          referencePrefix: "JOBSPORTAL",
         }),
       });
 

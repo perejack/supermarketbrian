@@ -187,7 +187,7 @@ function AdminPage() {
                 <Building2 className="size-5" />
               </span>
               <span className="font-display text-lg font-bold tracking-tight text-white">
-                KaziLink <span className="text-emerald-400">Executive HR</span>
+                Jobs Portal <span className="text-emerald-400">Executive HR</span>
               </span>
             </Link>
             <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-xs font-semibold text-emerald-400">
@@ -363,11 +363,15 @@ function AdminPage() {
                 >
                   {/* Left: Candidate Info & Badge */}
                   <div className="flex items-start gap-4">
-                    <div
-                      className="grid size-12 shrink-0 place-items-center rounded-2xl text-xl font-black text-white shadow-md"
-                      style={{ backgroundColor: market.primaryColor }}
-                    >
-                      {market.logoLetter}
+                    <div className="size-12 shrink-0 overflow-hidden rounded-2xl border border-zinc-800 bg-white p-1 shadow-md flex items-center justify-center">
+                      <img
+                        src={market.logoUrl}
+                        alt={market.name}
+                        className="size-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = "none";
+                        }}
+                      />
                     </div>
 
                     <div className="space-y-1">

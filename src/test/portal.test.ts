@@ -22,6 +22,7 @@ describe("Job Employment Portal Configuration", () => {
       expect(m.hrName).toBeTruthy();
       expect(m.hrPhone).toBeTruthy();
       expect(m.hrEmail).toBeTruthy();
+      expect(m.logoUrl).toContain("http");
     }
   });
 

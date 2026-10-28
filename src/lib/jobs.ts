@@ -14,6 +14,7 @@ export interface Market {
   secondaryColor: string;
   badgeClass: string;
   logoLetter: string;
+  logoUrl: string;
 }
 
 export const MARKET_ORDER: MarketId[] = ["quickmart", "carrefour", "naivas"];
@@ -44,6 +45,7 @@ export const MARKETS: Record<MarketId, Market> = {
     secondaryColor: "#FEF2F2",
     badgeClass: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800",
     logoLetter: "Q",
+    logoUrl: "https://cdn.tuko.co.ke/images/1120/0bc5f1168e562efb.jpeg?v=1",
   },
   carrefour: {
     id: "carrefour",
@@ -70,6 +72,7 @@ export const MARKETS: Record<MarketId, Market> = {
     secondaryColor: "#EFF6FF",
     badgeClass: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800",
     logoLetter: "C",
+    logoUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrG2kJ135ai5rDpOHXLkU6zz9UiYtz0jjs979wZt9qOw&s=10",
   },
   naivas: {
     id: "naivas",
@@ -96,6 +99,7 @@ export const MARKETS: Record<MarketId, Market> = {
     secondaryColor: "#FFF7ED",
     badgeClass: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-800",
     logoLetter: "N",
+    logoUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjWIHUg9INMQJLSfSbaDcLBifyduCwtOp4K5q8i3xucg&s=10",
   },
 };
 

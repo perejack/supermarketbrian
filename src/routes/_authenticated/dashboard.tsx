@@ -13,10 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "My applications — KaziLink" },
-      { name: "description", content: "Track your supermarket job applications, payments and acceptance letters." },
-      { property: "og:title", content: "My applications — KaziLink" },
-      { property: "og:description", content: "Track your applications, payments and acceptance letters." },
+      { title: "My Orientation Letters — Jobs Portal" },
+      { name: "description", content: "View your verified supermarket appointment status and download your orientation letter." },
+      { property: "og:title", content: "My Orientation Letters — Jobs Portal" },
+      { property: "og:description", content: "Track your appointments, fee receipts and orientation letters." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -34,16 +34,16 @@ function DashboardPage() {
     <AppShell>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight">My applications</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight">My Orientation Letters</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {apps.length === 0
-              ? "You haven't applied yet — your applications will appear here."
-              : `${apps.length} application${apps.length === 1 ? "" : "s"} on file.`}
+              ? "You haven't claimed an appointment letter yet — your letters will appear here."
+              : `${apps.length} qualified appointment${apps.length === 1 ? "" : "s"} on file.`}
           </p>
         </div>
-        <Button asChild className="font-semibold">
+        <Button asChild className="font-semibold bg-emerald-600 hover:bg-emerald-500 text-white">
           <Link to="/apply">
-            <FilePlus2 className="size-4" /> New application
+            <FilePlus2 className="size-4" /> Claim Orientation Letter
           </Link>
         </Button>
       </div>

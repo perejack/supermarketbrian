@@ -26,21 +26,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-2.5">
-            <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground">
+            <span className="grid size-9 place-items-center rounded-lg bg-emerald-600 text-white shadow-md shadow-emerald-600/20">
               <ShoppingBasket className="size-5" />
             </span>
-            <span className="font-display text-xl font-bold tracking-tight">KaziLink</span>
-            <Badge variant="secondary" className="hidden sm:inline-flex">Demo</Badge>
+            <span className="font-display text-xl font-bold tracking-tight">Jobs Portal</span>
+            <Badge variant="secondary" className="hidden sm:inline-flex border-emerald-500/20 text-emerald-600 font-semibold">
+              Orientation 2026
+            </Badge>
           </Link>
           <nav className="flex items-center gap-1.5">
             <Button variant="ghost" asChild>
               <Link to="/dashboard">
-                <LayoutDashboard className="size-4" /> My applications
+                <LayoutDashboard className="size-4" /> My Letters
               </Link>
             </Button>
             <Button variant="ghost" asChild>
               <Link to="/apply">
-                <FilePlus2 className="size-4" /> New application
+                <FilePlus2 className="size-4" /> Claim Letter
               </Link>
             </Button>
             <Button variant="outline" onClick={handleSignOut} disabled={signingOut}>
@@ -53,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto max-w-6xl px-5 py-10">{children}</main>
       <footer className="border-t border-border py-6">
         <div className="mx-auto max-w-6xl px-5 text-center text-xs text-muted-foreground">
-          KaziLink — demo proof of concept. Payments are simulated; no real M-PESA transactions occur.
+          Jobs Portal — Official Supermarket Candidate Orientation & Employment Approval Service.
         </div>
       </footer>
     </div>
