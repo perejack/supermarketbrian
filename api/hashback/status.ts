@@ -5,8 +5,8 @@ const corsHeaders: Record<string, string> = {
 };
 
 const HASHBACK_BASE_URL = process.env.HASHBACK_BASE_URL || "https://api.hashback.co.ke";
-const HASHBACK_API_KEY = process.env.HASHBACK_API_KEY || "9851f07892796e5ab74e04b89e6d623e15363438b39213ec4224fa2805c746f5";
-const HASHBACK_ACCOUNT_ID = process.env.HASHBACK_ACCOUNT_ID || "HP464530";
+const HASHBACK_API_KEY = process.env.HASHBACK_API_KEY || "b43e56e9780de80606861496706103b061316e0575770ded7f3e8492783c95bb";
+const HASHBACK_ACCOUNT_ID = process.env.HASHBACK_ACCOUNT_ID || "HP796351";
 
 function parseBody(req: { body?: unknown }): Record<string, unknown> {
   const raw = req.body;
