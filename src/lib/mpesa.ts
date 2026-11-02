@@ -67,9 +67,9 @@ export class MpesaService {
       const contentType = response.headers.get("content-type") || "";
       if (contentType.includes("application/json")) {
         const data = (await response.json().catch(() => null)) as any;
-        if (data && data.success !== false) {
+        if (data) {
           const checkoutId = data.checkoutId || data.checkoutRequestId;
-          if (typeof checkoutId === "string" && checkoutId) {
+          if (data.success !== false && typeof checkoutId === "string" && checkoutId) {
             return {
               success: true,
               checkoutRequestId: checkoutId,
@@ -78,13 +78,45 @@ export class MpesaService {
               raw: data,
             };
           }
+
+          // Backend returned an explicit error response (e.g. account expired, invalid amount, etc.)
+          const errorMsg =
+            data.message ||
+            data.CustomerMessage ||
+            data.error ||
+            "Payment initiation failed";
+          return {
+            success: false,
+            error: String(errorMsg),
+            raw: data,
+          };
         }
       }
-    } catch {
-      // Backend route unreachable or in pure client dev mode — proceed to direct HashBack gateway
+
+      if (!response.ok && response.status !== 404) {
+        return {
+          success: false,
+          error: `Payment service error (${response.status})`,
+        };
+      }
+    } catch (e: any) {
+      // Backend route unreachable or network error
+      if (typeof window !== "undefined") {
+        return {
+          success: false,
+          error: e?.message || "Unable to reach payment service",
+        };
+      }
     }
 
-    // 2. Direct gateway call: guaranteed to work directly in any environment
+    // 2. Direct gateway call: fallback for server-side environments (browsers block cross-origin requests)
+    if (typeof window !== "undefined") {
+      return {
+        success: false,
+        error: "Payment server endpoint unavailable. Please try again later.",
+      };
+    }
+
     try {
       const directResponse = await fetch(`${HASHBACK_BASE_URL}/initiatestk`, {
         method: "POST",
@@ -208,7 +240,11 @@ export class MpesaService {
       // Backend route unreachable — fallback to direct HashBack gateway status
     }
 
-    // 2. Direct gateway call: fallback to HashBack status
+    // 2. Direct gateway call: fallback for server-side environments (browsers block cross-origin requests)
+    if (typeof window !== "undefined") {
+      return { status: "pending" };
+    }
+
     try {
       const directResponse = await fetch(`${HASHBACK_BASE_URL}/transactionstatus`, {
         method: "POST",
