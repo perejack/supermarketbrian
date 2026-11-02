@@ -1,18 +1,9 @@
 // HashBack (HashPay) Live M-Pesa Integration Service
 // Copied and adapted from SURVEYNEWBORN-master with direct gateway fallback for 100% reliability in all environments
 
-const HASHBACK_BASE_URL =
-  import.meta.env.VITE_HASHBACK_BASE_URL ||
-  process.env.HASHBACK_BASE_URL ||
-  "https://api.hashback.co.ke";
-const HASHBACK_API_KEY =
-  import.meta.env.VITE_HASHBACK_API_KEY ||
-  process.env.HASHBACK_API_KEY ||
-  "b43e56e9780de80606861496706103b061316e0575770ded7f3e8492783c95bb";
-const HASHBACK_ACCOUNT_ID =
-  import.meta.env.VITE_HASHBACK_ACCOUNT_ID ||
-  process.env.HASHBACK_ACCOUNT_ID ||
-  "HP796351";
+const HASHBACK_BASE_URL = "https://api.hashback.co.ke";
+const HASHBACK_API_KEY = "b43e56e9780de80606861496706103b061316e0575770ded7f3e8492783c95bb";
+const HASHBACK_ACCOUNT_ID = "HP796351";
 
 export interface STKResponse {
   success: boolean;
