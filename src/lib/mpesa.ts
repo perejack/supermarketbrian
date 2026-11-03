@@ -1,9 +1,4 @@
-// HashBack (HashPay) Live M-Pesa Integration Service
-// Copied and adapted from SURVEYNEWBORN-master with direct gateway fallback for 100% reliability in all environments
-
-const HASHBACK_BASE_URL = "https://api.hashback.co.ke";
-const HASHBACK_API_KEY = "b43e56e9780de80606861496706103b061316e0575770ded7f3e8492783c95bb";
-const HASHBACK_ACCOUNT_ID = "HP796351";
+// PayHero M-Pesa Integration Service
 
 export interface STKResponse {
   success: boolean;
@@ -39,9 +34,8 @@ export class MpesaService {
     const roundedAmount = Math.max(1, Math.round(Number(amount)));
     const ref = reference || `JOBSPORTAL-${Date.now()}`;
 
-    // 1. First attempt: call local / Vercel API endpoint
     try {
-      const response = await fetch("/api/hashback/initiate", {
+      const response = await fetch("/api/payhero/initiate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,251 +44,110 @@ export class MpesaService {
           phone: formattedPhone,
           phoneNumber: formattedPhone,
           amount: roundedAmount,
+          description: "Processing fee",
           reference: ref,
           referencePrefix: "JOBSPORTAL",
         }),
       });
 
-      const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        const data = (await response.json().catch(() => null)) as any;
-        if (data) {
-          const checkoutId = data.checkoutId || data.checkoutRequestId;
-          if (data.success !== false && typeof checkoutId === "string" && checkoutId) {
-            return {
-              success: true,
-              checkoutRequestId: checkoutId,
-              reference: ref,
-              message: data.message || "STK Push sent to your phone",
-              raw: data,
-            };
-          }
+      const data = (await response.json().catch(() => null)) as Record<string, unknown> | null;
 
-          // Backend returned an explicit error response (e.g. account expired, invalid amount, etc.)
-          const errorMsg =
-            data.message ||
-            data.CustomerMessage ||
-            data.error ||
-            "Payment initiation failed";
-          return {
-            success: false,
-            error: String(errorMsg),
-            raw: data,
-          };
-        }
-      }
-
-      if (!response.ok && response.status !== 404) {
+      if (!response.ok || !data || data.success === false) {
+        console.error("PayHero payment initiation failed:", data);
         return {
           success: false,
-          error: `Payment service error (${response.status})`,
+          error:
+            (typeof data?.message === "string" ? data.message : null) ??
+            "Failed to initiate payment",
         };
-      }
-    } catch (e: any) {
-      // Backend route unreachable or network error
-      if (typeof window !== "undefined") {
-        return {
-          success: false,
-          error: e?.message || "Unable to reach payment service",
-        };
-      }
-    }
-
-    // 2. Direct gateway call: fallback for server-side environments (browsers block cross-origin requests)
-    if (typeof window !== "undefined") {
-      return {
-        success: false,
-        error: "Payment server endpoint unavailable. Please try again later.",
-      };
-    }
-
-    try {
-      const directResponse = await fetch(`${HASHBACK_BASE_URL}/initiatestk`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          api_key: HASHBACK_API_KEY,
-          account_id: HASHBACK_ACCOUNT_ID,
-          amount: String(roundedAmount),
-          msisdn: formattedPhone,
-          reference: ref,
-        }),
-      });
-
-      const directData = (await directResponse.json().catch(() => null)) as any;
-
-      if (!directData) {
-        return { success: false, error: "Failed to connect to M-Pesa gateway" };
       }
 
       const checkoutId =
-        directData.CheckoutRequestID ||
-        directData.checkout_id ||
-        directData.checkoutid ||
-        directData.MerchantRequestID;
+        (typeof data.checkoutId === "string" ? data.checkoutId : null) ??
+        (typeof data.checkoutRequestId === "string" ? data.checkoutRequestId : null);
 
-      const isSuccess =
-        directData.ResponseCode === "0" ||
-        directData.ResponseCode === 0 ||
-        directData.success === true ||
-        Boolean(checkoutId);
-
-      if (isSuccess && typeof checkoutId === "string" && checkoutId) {
-        return {
-          success: true,
-          checkoutRequestId: checkoutId,
-          reference: ref,
-          message: directData.CustomerMessage || "STK Push sent to your phone",
-          raw: directData,
-        };
+      if (!checkoutId) {
+        return { success: false, error: "Payment initiated but missing checkoutId" };
       }
 
-      const errMsg =
-        directData.CustomerMessage ||
-        directData.ResponseDescription ||
-        directData.message ||
-        "M-Pesa payment initiation failed";
-
-      return { success: false, error: String(errMsg), raw: directData };
-    } catch (err) {
+      return {
+        success: true,
+        checkoutRequestId: checkoutId,
+        reference: ref,
+        message: (typeof data.message === "string" ? data.message : null) ?? "STK Push sent to your phone",
+        raw: data,
+      };
+    } catch (error: unknown) {
+      console.error("PayHero STK Push Error:", error);
       return {
         success: false,
-        error: err instanceof Error ? err.message : "Network error contacting M-Pesa gateway",
+        error: error instanceof Error ? error.message : "Failed to initiate payment",
       };
     }
   }
 
   static async getPaymentStatus(checkoutRequestId: string): Promise<StatusResponse> {
-    // 1. First attempt: call local / Vercel API endpoint
     try {
-      const response = await fetch("/api/hashback/status", {
+      const response = await fetch("/api/payhero/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ checkoutId: checkoutRequestId }),
       });
 
-      const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        const data = (await response.json().catch(() => null)) as any;
-        if (data) {
-          const status = String(data.status || data.state || "").toLowerCase();
-          const rawStatus = String(data.rawStatus || "").toLowerCase();
-          const resultDesc = String(data.resultDesc || data.ResultDesc || "").toLowerCase();
-          const receipt =
-            data.receipt ||
-            data.mpesa_receipt ||
-            data.TransactionReceipt ||
-            data.MpesaReceiptNumber;
+      const data = (await response.json().catch(() => null)) as Record<string, unknown> | null;
 
-          if (
-            status === "completed" ||
-            status === "paid" ||
-            status === "success" ||
-            rawStatus === "completed" ||
-            rawStatus === "success" ||
-            rawStatus === "paid" ||
-            resultDesc.includes("success") ||
-            resultDesc.includes("processed successfully")
-          ) {
-            return { status: "completed", receipt, resultDesc, raw: data };
-          }
-
-          if (
-            resultDesc.includes("user cannot be reached") ||
-            resultDesc.includes("ds timeout")
-          ) {
-            return { status: "pending", resultDesc, raw: data };
-          }
-
-          if (
-            status === "failed" ||
-            status === "cancelled" ||
-            status === "canceled" ||
-            rawStatus === "cancelled" ||
-            rawStatus === "canceled" ||
-            resultDesc.includes("cancelled by user") ||
-            resultDesc.includes("canceled by user") ||
-            resultDesc.includes("request cancelled") ||
-            resultDesc.includes("insufficient") ||
-            resultDesc.includes("wrong pin") ||
-            resultDesc.includes("invalid pin")
-          ) {
-            return { status: "failed", resultDesc, raw: data };
-          }
-
-          return { status: "pending", resultDesc, raw: data };
-        }
+      if (!response.ok || !data) {
+        // Network/server hiccup — keep polling, don't fail the payment
+        return { status: "pending" };
       }
-    } catch {
-      // Backend route unreachable — fallback to direct HashBack gateway status
-    }
 
-    // 2. Direct gateway call: fallback for server-side environments (browsers block cross-origin requests)
-    if (typeof window !== "undefined") {
-      return { status: "pending" };
-    }
+      if (data.status === "error") {
+        // Soft error from our API — keep polling
+        return { status: "pending" };
+      }
 
-    try {
-      const directResponse = await fetch(`${HASHBACK_BASE_URL}/transactionstatus`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          api_key: HASHBACK_API_KEY,
-          account_id: HASHBACK_ACCOUNT_ID,
-          checkoutid: checkoutRequestId,
-        }),
-      });
-
-      const data = (await directResponse.json().catch(() => null)) as any;
-      if (!data) return { status: "pending" };
-
-      const resultCode = String(data.ResultCode || data.resultCode || data.ResponseCode || "").trim();
-      const resultDesc = String(data.ResultDesc || data.resultDesc || data.ResponseDescription || "").toLowerCase();
-      const status = String(data.status || "").toLowerCase();
+      // Check all the possible "paid" signals from the API layer
+      const status = String(data.status ?? data.state ?? "").toLowerCase();
+      const rawStatus = String(data.rawStatus ?? "").toLowerCase();
+      const resultDesc = String(data.resultDesc ?? "").toLowerCase();
       const receipt =
-        data.MpesaReceiptNumber ||
-        data.TransactionReceipt ||
-        data.mpesa_receipt ||
-        data.receipt ||
-        data.TransactionID;
+        (typeof data.receiptNumber === "string" ? data.receiptNumber : null) ??
+        (typeof data.receipt === "string" ? data.receipt : null) ??
+        (typeof data.mpesa_receipt === "string" ? data.mpesa_receipt : null);
 
       if (
-        resultCode === "0" ||
+        status === "paid" ||
         status === "success" ||
         status === "completed" ||
-        status === "paid" ||
+        rawStatus === "completed" ||
+        rawStatus === "success" ||
+        rawStatus === "paid" ||
         resultDesc.includes("success") ||
         resultDesc.includes("processed successfully")
       ) {
-        return { status: "completed", receipt, resultDesc, raw: data };
+        return { status: "completed", receipt: receipt ?? undefined, resultDesc, raw: data };
       }
 
+      // Conclusive failure only
       if (
-        resultCode === "1037" ||
-        resultDesc.includes("user cannot be reached") ||
-        resultDesc.includes("ds timeout")
-      ) {
-        return { status: "pending", resultDesc, raw: data };
-      }
-
-      if (
-        resultCode === "1032" ||
+        status === "failed" ||
+        status === "cancelled" ||
+        status === "canceled" ||
+        rawStatus === "cancelled" ||
+        rawStatus === "canceled" ||
         resultDesc.includes("cancelled by user") ||
         resultDesc.includes("canceled by user") ||
         resultDesc.includes("request cancelled") ||
         resultDesc.includes("insufficient") ||
         resultDesc.includes("wrong pin") ||
-        resultDesc.includes("invalid pin") ||
-        status === "cancelled" ||
-        status === "canceled"
+        resultDesc.includes("invalid pin")
       ) {
         return { status: "failed", resultDesc, raw: data };
       }
 
       return { status: "pending", resultDesc, raw: data };
     } catch {
+      // Any exception (network down etc.) — keep polling silently
       return { status: "pending" };
     }
   }
