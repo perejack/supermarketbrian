@@ -170,7 +170,7 @@ export const createApplication = createServerFn({ method: "POST" })
       id_number: data.idNumber?.trim() || null,
       preferred_branch: data.preferredBranch || market.branches[0],
       orientation_branch: data.orientationBranch || data.preferredBranch || market.branches[0],
-      orientation_date: data.orientationDate || "2026-10-19",
+      orientation_date: data.orientationDate || new Date().toISOString().slice(0, 10),
       availability: data.availability || "Full Day Orientation",
       id_front_path: data.idFrontPath || null,
       id_back_path: data.idBackPath || null,

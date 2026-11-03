@@ -47,7 +47,16 @@ export const Route = createFileRoute("/letter")({
 });
 
 function formatLongDate(value: string | undefined): string {
-  if (!value) return "Monday, 19th October 2026";
+  if (!value) {
+    const fallback = new Date();
+    fallback.setDate(fallback.getDate() + 3);
+    return fallback.toLocaleDateString("en-KE", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }
   try {
     const d = new Date(value.length === 10 ? `${value}T00:00:00` : value);
     if (isNaN(d.getTime())) return value;

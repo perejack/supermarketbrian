@@ -103,7 +103,7 @@ function Landing() {
           </div>
           <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground sm:text-sm">
             <span className="flex items-center gap-1.5">
-              <Calendar className="size-4 text-emerald-600" /> Monday, 19th October 2026 Orientation
+              <Calendar className="size-4 text-emerald-600" /> Select Preferred Orientation Date
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="size-4 text-emerald-600" /> 9:00 AM Prompt

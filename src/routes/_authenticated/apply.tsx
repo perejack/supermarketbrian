@@ -51,6 +51,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 type ApplySearch = { market?: string; role?: string };
 
@@ -93,7 +97,13 @@ export function ApplyPage() {
   // Form Fields
   const [preferredBranch, setPreferredBranch] = useState<string>(MARKETS[initialMarket].branches[0]);
   const [orientationBranch, setOrientationBranch] = useState<string>(MARKETS[initialMarket].branches[0]);
-  const [orientationDate, setOrientationDate] = useState<string>("2026-10-19");
+  const [selectedOrientationDate, setSelectedOrientationDate] = useState<Date | undefined>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 3);
+    if (d.getDay() === 0) d.setDate(d.getDate() + 1); // skip Sunday
+    return d;
+  });
+  const orientationDate = selectedOrientationDate ? format(selectedOrientationDate, "yyyy-MM-dd") : "";
   const [availability, setAvailability] = useState<string>("Full day available from 8:30 AM");
 
   const [fullName, setFullName] = useState("");
@@ -567,20 +577,69 @@ export function ApplyPage() {
                 </Select>
               </div>
 
-              {/* Orientation Date */}
+              {/* Orientation Date Picker */}
               <div className="space-y-2">
-                <Label>When You Are Available to Attend Orientation</Label>
-                <Select value={orientationDate} onValueChange={setOrientationDate}>
-                  <SelectTrigger className="h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2026-10-19">Monday, 19th October 2026 (9:00 AM)</SelectItem>
-                    <SelectItem value="2026-10-26">Monday, 26th October 2026 (9:00 AM)</SelectItem>
-                    <SelectItem value="2026-10-28">Wednesday, 28th October 2026 (9:00 AM)</SelectItem>
-                    <SelectItem value="2026-11-02">Monday, 2nd November 2026 (9:00 AM)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="orientation-date-picker" className="text-sm font-semibold">
+                    Select Your Orientation & Onboarding Date
+                  </Label>
+                  {selectedOrientationDate && (
+                    <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
+                      {format(selectedOrientationDate, "EEE, d MMM yyyy")}
+                    </Badge>
+                  )}
+                </div>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="orientation-date-picker"
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        "h-12 w-full justify-start text-left font-normal border-input hover:bg-accent/40 rounded-xl px-4",
+                        !selectedOrientationDate && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-3 size-4 text-emerald-600 shrink-0" />
+                      {selectedOrientationDate ? (
+                        <div className="flex flex-col text-left">
+                          <span className="font-semibold text-foreground text-sm">
+                            {format(selectedOrientationDate, "EEEE, d MMMM yyyy")}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            Session starts at 9:00 AM Prompt · In-person attendance
+                          </span>
+                        </div>
+                      ) : (
+                        <span>Click to choose your orientation date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border bg-card" align="start">
+                    <CalendarPicker
+                      mode="single"
+                      selected={selectedOrientationDate}
+                      onSelect={(d) => {
+                        if (d) setSelectedOrientationDate(d);
+                      }}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        // Disable past dates
+                        if (date < today) return true;
+                        // Corporate orientation runs Monday - Saturday
+                        return date.getDay() === 0;
+                      }}
+                      initialFocus
+                    />
+                    <div className="border-t border-border p-3 bg-muted/30 text-center">
+                      <p className="text-[11px] text-muted-foreground">
+                        Sundays are closed. Select any upcoming date from Monday to Saturday.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Availability Notes */}
