@@ -4,21 +4,9 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-const DEFAULT_HASHBACK_BASE_URL = "https://api.hashback.co.ke";
-const DEFAULT_HASHBACK_API_KEY = "b43e56e9780de80606861496706103b061316e0575770ded7f3e8492783c95bb";
-const DEFAULT_HASHBACK_ACCOUNT_ID = "HP796351";
-
-function getBaseUrl(): string {
-  return process.env.HASHBACK_BASE_URL?.trim() || DEFAULT_HASHBACK_BASE_URL;
-}
-
-function getApiKey(): string {
-  return process.env.HASHBACK_API_KEY?.trim() || DEFAULT_HASHBACK_API_KEY;
-}
-
-function getAccountId(): string {
-  return process.env.HASHBACK_ACCOUNT_ID?.trim() || DEFAULT_HASHBACK_ACCOUNT_ID;
-}
+const HASHBACK_BASE_URL = "https://api.hashback.co.ke";
+const HASHBACK_API_KEY = "b43e56e9780de80606861496706103b061316e0575770ded7f3e8492783c95bb";
+const HASHBACK_ACCOUNT_ID = "HP796351";
 
 function parseBody(req: { body?: unknown }): Record<string, unknown> {
   const raw = req.body;
@@ -48,17 +36,6 @@ export default async function handler(req: any, res: any) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
-  const apiKey = getApiKey();
-  const accountId = getAccountId();
-  const baseUrl = getBaseUrl();
-
-  if (!apiKey || !accountId) {
-    return res.status(500).json({
-      success: false,
-      message: "HashBack credentials not configured in environment variables (HASHBACK_API_KEY / HASHBACK_ACCOUNT_ID).",
-    });
-  }
-
   try {
     const body = parseBody(req);
     const rawPhone =
@@ -76,14 +53,14 @@ export default async function handler(req: any, res: any) {
     const externalReference = typeof body.reference === "string" ? body.reference : `${referencePrefix}-${Date.now()}`;
 
     const payload = {
-      api_key: apiKey,
-      account_id: accountId,
+      api_key: HASHBACK_API_KEY,
+      account_id: HASHBACK_ACCOUNT_ID,
       amount: String(Math.round(amount)),
       msisdn: normalizedPhone,
       reference: externalReference,
     };
 
-    const hashbackRes = await fetch(`${baseUrl}/initiatestk`, {
+    const hashbackRes = await fetch(`${HASHBACK_BASE_URL}/initiatestk`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
