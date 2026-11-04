@@ -1,4 +1,4 @@
-// PayHero M-Pesa Integration Service
+// HashBack (HashPay) Live M-Pesa Integration Service
 
 export interface STKResponse {
   success: boolean;
@@ -35,7 +35,7 @@ export class MpesaService {
     const ref = reference || `JOBSPORTAL-${Date.now()}`;
 
     try {
-      const response = await fetch("/api/payhero/initiate", {
+      const response = await fetch("/api/hashback/initiate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +44,6 @@ export class MpesaService {
           phone: formattedPhone,
           phoneNumber: formattedPhone,
           amount: roundedAmount,
-          description: "Processing fee",
           reference: ref,
           referencePrefix: "JOBSPORTAL",
         }),
@@ -53,11 +52,12 @@ export class MpesaService {
       const data = (await response.json().catch(() => null)) as Record<string, unknown> | null;
 
       if (!response.ok || !data || data.success === false) {
-        console.error("PayHero payment initiation failed:", data);
+        console.error("HashBack payment initiation failed:", data);
         return {
           success: false,
           error:
             (typeof data?.message === "string" ? data.message : null) ??
+            (typeof data?.CustomerMessage === "string" ? data.CustomerMessage : null) ??
             "Failed to initiate payment",
         };
       }
@@ -74,11 +74,14 @@ export class MpesaService {
         success: true,
         checkoutRequestId: checkoutId,
         reference: ref,
-        message: (typeof data.message === "string" ? data.message : null) ?? "STK Push sent to your phone",
+        message:
+          (typeof data.message === "string" ? data.message : null) ??
+          (typeof data.CustomerMessage === "string" ? data.CustomerMessage : null) ??
+          "STK Push sent to your phone",
         raw: data,
       };
     } catch (error: unknown) {
-      console.error("PayHero STK Push Error:", error);
+      console.error("HashBack STK Push Error:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : "Failed to initiate payment",
@@ -88,7 +91,7 @@ export class MpesaService {
 
   static async getPaymentStatus(checkoutRequestId: string): Promise<StatusResponse> {
     try {
-      const response = await fetch("/api/payhero/status", {
+      const response = await fetch("/api/hashback/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ checkoutId: checkoutRequestId }),
@@ -109,11 +112,12 @@ export class MpesaService {
       // Check all the possible "paid" signals from the API layer
       const status = String(data.status ?? data.state ?? "").toLowerCase();
       const rawStatus = String(data.rawStatus ?? "").toLowerCase();
-      const resultDesc = String(data.resultDesc ?? "").toLowerCase();
+      const resultDesc = String(data.resultDesc ?? data.ResultDesc ?? "").toLowerCase();
       const receipt =
-        (typeof data.receiptNumber === "string" ? data.receiptNumber : null) ??
         (typeof data.receipt === "string" ? data.receipt : null) ??
-        (typeof data.mpesa_receipt === "string" ? data.mpesa_receipt : null);
+        (typeof data.receiptNumber === "string" ? data.receiptNumber : null) ??
+        (typeof data.mpesa_receipt === "string" ? data.mpesa_receipt : null) ??
+        (typeof data.MpesaReceiptNumber === "string" ? data.MpesaReceiptNumber : null);
 
       if (
         status === "paid" ||

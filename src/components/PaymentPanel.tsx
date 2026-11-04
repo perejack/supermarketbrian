@@ -55,7 +55,7 @@ export function PaymentPanel({
     };
   }, []);
 
-  // REAL LIVE PAYHERO STK PUSH (KSh 10)
+  // REAL LIVE HASHBACK STK PUSH
   async function handleLiveSTKPush(e?: React.FormEvent) {
     if (e) e.preventDefault();
     if (phone.replace(/\D/g, "").length < 9) {
@@ -67,7 +67,6 @@ export function PaymentPanel({
     setError(null);
 
     try {
-      // Amount 10 for testing as requested
       const res = await initiateSTK(phone, APPLICATION_FEE, referenceNumber);
 
       if (!res.success || !res.checkoutId) {
@@ -80,7 +79,7 @@ export function PaymentPanel({
       setStage("polling");
       setBusy(false);
 
-      // Start active status polling via PayHero
+      // Start active status polling via HashBack
       const stopPolling = await pollPaymentStatus(
         res.checkoutId,
         async (realReceipt) => {
@@ -140,7 +139,7 @@ export function PaymentPanel({
                 LIPA NA M-PESA
               </span>
               <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                Live PayHero Gateway
+                Live HashBack Gateway
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -253,7 +252,7 @@ export function PaymentPanel({
             <div className="flex items-start gap-2.5">
               <ShieldCheck className="size-4 shrink-0 text-emerald-600" />
               <div>
-                <p className="font-semibold text-foreground">Live PayHero Gateway Connected</p>
+                <p className="font-semibold text-foreground">Live HashBack Gateway Connected</p>
                 <p className="mt-0.5">
                   Enter your real Safaricom number below. A live M-PESA STK prompt for <strong>KSh {APPLICATION_FEE}</strong> will
                   be pushed directly to your physical handset.
@@ -313,7 +312,7 @@ export function PaymentPanel({
 
           <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-muted-foreground">
             <Lock className="size-3 text-emerald-600" />
-            <span>Secure 256-bit SSL · Live PayHero Safaricom Daraja STK Push</span>
+            <span>Secure 256-bit SSL · Live HashBack Safaricom Daraja STK Push</span>
           </div>
         </form>
       )}

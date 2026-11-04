@@ -4,9 +4,9 @@ const corsHeaders: Record<string, string> = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-const HASHBACK_BASE_URL = "https://api.hashback.co.ke";
-const HASHBACK_API_KEY = "b43e56e9780de80606861496706103b061316e0575770ded7f3e8492783c95bb";
-const HASHBACK_ACCOUNT_ID = "HP796351";
+const HASHBACK_BASE_URL = process.env.HASHBACK_BASE_URL || "https://api.hashback.co.ke";
+const HASHBACK_API_KEY = process.env.HASHBACK_API_KEY;
+const HASHBACK_ACCOUNT_ID = process.env.HASHBACK_ACCOUNT_ID;
 
 function parseBody(req: { body?: unknown }): Record<string, unknown> {
   const raw = req.body;
@@ -72,6 +72,13 @@ export default async function handler(req: any, res: any) {
   Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
+
+  if (!HASHBACK_API_KEY || !HASHBACK_ACCOUNT_ID) {
+    return res.status(500).json({
+      status: "error",
+      message: "HashBack credentials not configured in environment variables (HASHBACK_API_KEY / HASHBACK_ACCOUNT_ID).",
+    });
+  }
 
   try {
     const body = parseBody(req);
