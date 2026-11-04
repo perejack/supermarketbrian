@@ -276,7 +276,7 @@ function AdminPage() {
             }`}
           >
             <div className="flex items-center justify-between text-amber-400">
-              <span className="text-xs font-semibold uppercase tracking-wider">Pending Fee ({formatKsh(650)})</span>
+              <span className="text-xs font-semibold uppercase tracking-wider">Pending Fee ({formatKsh(APPLICATION_FEE)})</span>
               <Clock3 className="size-4 text-amber-400" />
             </div>
             <p className="mt-3 font-display text-3xl font-black text-amber-400">{unpaidCount}</p>
@@ -486,7 +486,7 @@ function AdminPage() {
                             <Clock3 className="mr-1 size-3 text-amber-400" />
                             PENDING (UNPAID)
                           </Badge>
-                          <p className="text-[10px] text-zinc-500">KSh 650 fee not yet completed</p>
+                          <p className="text-[10px] text-zinc-500">{formatKsh(APPLICATION_FEE)} fee not yet completed</p>
                         </div>
                       )}
                     </div>
