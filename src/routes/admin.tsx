@@ -230,34 +230,58 @@ function AdminPage() {
         {/* Executive KPI Stats Cards */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total Submissions */}
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 shadow-lg backdrop-blur">
+          <button
+            type="button"
+            onClick={() => setStatusFilter("all")}
+            className={`text-left rounded-2xl border transition-all p-5 shadow-lg backdrop-blur cursor-pointer ${
+              statusFilter === "all"
+                ? "border-emerald-500/60 bg-zinc-900/90 ring-1 ring-emerald-500/30"
+                : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700 hover:bg-zinc-900/80"
+            }`}
+          >
             <div className="flex items-center justify-between text-zinc-400">
               <span className="text-xs font-semibold uppercase tracking-wider">Total Submissions</span>
               <Users className="size-4 text-zinc-400" />
             </div>
             <p className="mt-3 font-display text-3xl font-black text-white">{totalCount}</p>
             <p className="mt-1 text-xs text-zinc-500">Registered candidates on record</p>
-          </div>
+          </button>
 
           {/* Paid & Verified */}
-          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5 shadow-lg shadow-emerald-950/10 backdrop-blur">
+          <button
+            type="button"
+            onClick={() => setStatusFilter("paid")}
+            className={`text-left rounded-2xl border transition-all p-5 shadow-lg backdrop-blur cursor-pointer ${
+              statusFilter === "paid"
+                ? "border-emerald-500 bg-emerald-950/40 ring-1 ring-emerald-500/40"
+                : "border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-500/60 hover:bg-emerald-950/30"
+            }`}
+          >
             <div className="flex items-center justify-between text-emerald-400">
               <span className="text-xs font-semibold uppercase tracking-wider">Paid & Authenticated</span>
               <CheckCircle2 className="size-4 text-emerald-400" />
             </div>
             <p className="mt-3 font-display text-3xl font-black text-emerald-400">{paidCount}</p>
             <p className="mt-1 text-xs text-emerald-300/70">Letters issued & orientation slots reserved</p>
-          </div>
+          </button>
 
           {/* Pending / Incomplete */}
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-5 shadow-lg shadow-amber-950/10 backdrop-blur">
+          <button
+            type="button"
+            onClick={() => setStatusFilter("pending")}
+            className={`text-left rounded-2xl border transition-all p-5 shadow-lg backdrop-blur cursor-pointer ${
+              statusFilter === "pending"
+                ? "border-amber-500 bg-amber-950/40 ring-1 ring-amber-500/40"
+                : "border-amber-500/30 bg-amber-950/20 hover:border-amber-500/60 hover:bg-amber-950/30"
+            }`}
+          >
             <div className="flex items-center justify-between text-amber-400">
               <span className="text-xs font-semibold uppercase tracking-wider">Pending Fee ({formatKsh(650)})</span>
               <Clock3 className="size-4 text-amber-400" />
             </div>
             <p className="mt-3 font-display text-3xl font-black text-amber-400">{unpaidCount}</p>
             <p className="mt-1 text-xs text-amber-300/70">Submitted profile & ID but haven't paid</p>
-          </div>
+          </button>
 
           {/* Total Revenue */}
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 shadow-lg backdrop-blur">
@@ -346,10 +370,36 @@ function AdminPage() {
           {filteredApplications.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-zinc-800 bg-zinc-900/30 p-12 text-center">
               <Users className="mx-auto size-10 text-zinc-600" />
-              <h3 className="mt-4 font-display text-lg font-bold text-zinc-300">No applicants match criteria</h3>
-              <p className="mt-1 text-sm text-zinc-500">
-                Try clearing your search query or switching your filters.
+              <h3 className="mt-4 font-display text-lg font-bold text-zinc-300">
+                {statusFilter === "paid" && unpaidCount > 0
+                  ? `No Paid Applicants Yet (${unpaidCount} Pending)`
+                  : "No applicants match criteria"}
+              </h3>
+              <p className="mt-1 text-sm text-zinc-500 max-w-md mx-auto">
+                {statusFilter === "paid" && unpaidCount > 0
+                  ? "Applicants who have submitted their credentials & ID documents are currently in the Pending queue awaiting M-Pesa payment."
+                  : "Try clearing your search query or switching your filters."}
               </p>
+              {statusFilter !== "all" && (
+                <div className="mt-5 flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter("all")}
+                    className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-800 text-xs font-semibold text-white hover:bg-zinc-700 transition-all cursor-pointer shadow-sm"
+                  >
+                    View All Applicants ({totalCount})
+                  </button>
+                  {unpaidCount > 0 && statusFilter === "paid" && (
+                    <button
+                      type="button"
+                      onClick={() => setStatusFilter("pending")}
+                      className="px-4 py-2 rounded-xl bg-amber-600 text-xs font-semibold text-white hover:bg-amber-500 transition-all cursor-pointer shadow-sm"
+                    >
+                      View Pending Applicants ({unpaidCount})
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             filteredApplications.map((app) => {
