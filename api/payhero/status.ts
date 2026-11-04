@@ -23,7 +23,7 @@ function parseBody(req: { body?: unknown }): Record<string, unknown> {
 }
 
 const PAYHERO_AUTH_HEADER =
-  "Basic aEttTWluZFhYbzBDWE9CTzJZd2c6d0VBUWFrd1NxWklWYjAyRFdJaHI1R095eFc4Tlg4Slk1OUk3bmFvMg==";
+  "Basic MGNvNWd3a3BIeEdMT0tGRUVzQjI6TjJ4b0FLblpKd2R2eXpDRjlTaER2N1FURk51V3lnT2g3M0J0TjZqSw==";
 
 function getAuthHeader(): string {
   const envVal = process.env.PAYHERO_AUTH_HEADER?.trim();
