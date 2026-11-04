@@ -152,7 +152,7 @@ export function PaymentPanel({
         <div className="text-right">
           <div className="flex items-center gap-1.5 justify-end">
             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/15 px-2 py-0.5 rounded-full">
-              Test Amount
+              Official Fee
             </span>
           </div>
           <p className="font-display text-3xl font-black text-emerald-600 dark:text-emerald-400">

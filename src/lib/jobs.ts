@@ -214,7 +214,7 @@ export function allowanceFor(position: Position, _market: MarketId): string {
   return position.allowanceValue;
 }
 
-export const APPLICATION_FEE = 10;
+export const APPLICATION_FEE = 650;
 export const ORIENTATION_TIME = "9:00 AM";
 
 export function formatKsh(value: number): string {
